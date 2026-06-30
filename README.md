@@ -2,28 +2,13 @@
 
 > **1行ピッチ**：何を聴くかではなく、どう聴いているかでつながる。音楽が好きで、曲の自分なりの聴き方を持つ人が、同じ聴き方の人とつながる iOS アプリ。
 
+> **個人継続プロジェクト**: ハッカソン終了後、ソロで開発を継続しています。
+
 ## スクリーンショット
 
 <!-- README先頭の見栄え兼SNS素材。Day2 終了までに最低1枚は貼る -->
 
 <img width="750" height="424" alt="image" src="https://github.com/user-attachments/assets/c47cee68-2fb9-47ce-8dd6-3e7ad4c3db8d" />
-
-## チーム情報
-
-| 項目 | 内容 |
-|---|---|
-| チーム名 | Othello |
-| プロダクト名 | HowTune |
-| 担当メンター | yaginuun |
-
-### メンバー
-
-| GitHub | 氏名 | 大学 / 学部 | 担当役割 |
-|---|---|---|---|
-| @AtsushiHosaka | 保坂篤志 | 早稲田大学 基幹理工学部 | iOS |
-| @ozko00 | 小澤洸介 | 東京理科大学 工学部 | iOS/Design |
-| @NicholasEric | Nicholas Eric | 名古屋大学 工学部 | Backend / DB |
-| @au-aii | 田中陽輝 | 東洋大学　総合情報学研究科 | ML / PM |
 
 ## プロダクト概要
 
@@ -38,28 +23,14 @@
 - 音楽が好きなリスナー
 - 自分の聴き方を発信し、近い価値観の人とつながりたい人
 
-## 提出ステータス（運営チェック用 — 各 Day 終了時に記入）
-
-- [x] **Day1 終了時**：テーマ確定（プロダクト名・解決課題・ターゲットを記入済み）
-- [x] **Day2 終了時**：MVP 動作（実機で動くデモ）
-- [x] **Day3 終了時**：提出完了（プレゼン資料 URL / デモ動画 URL / AI 活用ログ完成）
-
-## 提出物チェックリスト（Day3 12:00 提出〆切）
-
-- [ ] 動くデモ（実機 / TestFlight）
-- [ ] ソースコード（このリポに push 済み）
-- [ ] [`AI_USAGE_LOG.md`](./AI_USAGE_LOG.md)（AI 活用ログ、開発期間中の追記必須）
-- [ ] プレゼン資料（PDF or Slides URL を記載）
-- [ ] デモ動画（任意・1 分以内・URL 記載）
-
 ## デモ・関連リンク
 
-| 種別 | URL |
-|---|---|
-| デモ（実機 / TestFlight） | https://testflight.apple.com/join/mK7WXTJT |
-| プレゼン資料 | [https://canva.link/g7eobtoh0v7zu0z](https://canva.link/g7eobtoh0v7zu0z) |
-| デモ動画 | [https://youtube.com/shorts/YGX9DLsSwg4](https://youtube.com/shorts/YGX9DLsSwg4), [https://youtube.com/shorts/t9B-z5PbwYY](https://youtube.com/shorts/t9B-z5PbwYY) |
-| 仕様書（source of truth） | [`docs`](./docs) |
+| 種別                      | URL                                                                                                                                                                |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| デモ（実機 / TestFlight） | https://testflight.apple.com/join/mK7WXTJT                                                                                                                         |
+| プレゼン資料              | [https://canva.link/g7eobtoh0v7zu0z](https://canva.link/g7eobtoh0v7zu0z)                                                                                           |
+| デモ動画                  | [https://youtube.com/shorts/YGX9DLsSwg4](https://youtube.com/shorts/YGX9DLsSwg4), [https://youtube.com/shorts/t9B-z5PbwYY](https://youtube.com/shorts/t9B-z5PbwYY) |
+| 仕様書（source of truth） | [`docs`](./docs)                                                                                                                                                   |
 
 ## 技術スタック
 
@@ -74,10 +45,10 @@
 
 ### 使用した外部 API / サービス
 
-| サービス名 | 用途 | プラン | 備考 |
-|---|---|---|---|
-| Apple MusicKit | 楽曲情報・再生位置取得 | サブスクリプション | AppleMusicのサブスクリプションが必要 |
-| Musixmatch | 時間同期歌詞または静的歌詞取得 | 要 API key | `ENV.plist` の `MUSIXMATCH_API_KEY` に設定 |
+| サービス名     | 用途                           | プラン             | 備考                                       |
+| -------------- | ------------------------------ | ------------------ | ------------------------------------------ |
+| Apple MusicKit | 楽曲情報・再生位置取得         | サブスクリプション | AppleMusicのサブスクリプションが必要       |
+| Musixmatch     | 時間同期歌詞または静的歌詞取得 | 要 API key         | `ENV.plist` の `MUSIXMATCH_API_KEY` に設定 |
 
 → API キー・秘匿情報は `.env` / `ENV.plist`（`.gitignore` 対象）で管理し、git に含めない。
 
@@ -113,10 +84,10 @@ cp Othello/Othello/ENV.example.plist Othello/Othello/ENV.plist
 
 `.env` に必要なキー：
 
-| 変数名 | 説明 |
-|---|---|
-| `API_BASE_URL` | Functions API の URL |
-| `MUSIXMATCH_API_KEY` | Musixmatch API キー |
+| 変数名               | 説明                 |
+| -------------------- | -------------------- |
+| `API_BASE_URL`       | Functions API の URL |
+| `MUSIXMATCH_API_KEY` | Musixmatch API キー  |
 
 ### 2. iOS アプリを起動する
 
@@ -135,72 +106,27 @@ open Othello/Othello.xcodeproj
 - **MusicKit**：Apple Developer の App ID で MusicKit App Service を有効化し、プロビジョニングプロファイルを更新してから実機ビルドする
 - **Musixmatch**：`Othello/Othello/ENV.example.plist` を `ENV.plist` にコピーし、`MUSIXMATCH_API_KEY` を設定する。`matcher.track.get` と `track.lyrics.get` が 401/402/403 を返す場合は API key・利用上限・契約プランを確認する
 
+### Firebase プロジェクトの切り替え
+
+1. Firebase Console で新しいプロジェクトを作成する
+2. iOS アプリを追加し `GoogleService-Info.plist` をダウンロードして `Othello/Othello/` に配置する
+3. `Othello/Othello/ENV.plist` の `API_BASE_URL` を新しい Cloud Functions のエンドポイントに書き換える
+4. `functions/scripts/seed-resonance.js` を実行してデモ用データを投入する（詳細: `docs/resonance-phase1/`）
+
+> **Note**: Apple Developer Program に未加入のため TestFlight 配布は不可。Xcode から直接実機にインストールして動作確認してください。
 
 ## ドキュメント
 
-| ファイル | 内容 |
-|---|---|
-| [`docs/frontend-spec.md`](./docs/frontend-spec.md) | **仕様の source of truth**（Notion ミラー、SDD） |
-| [`docs/product-requirements.md`](./docs/product-requirements.md) | プロダクト要求定義（PRD） |
-| [`docs/architecture.md`](./docs/architecture.md) | アーキテクチャ設計 |
-| [`docs/functional-design.md`](./docs/functional-design.md) | 機能設計 |
-| [`docs/setup.md`](./docs/setup.md) | ローカル開発環境のセットアップ手順 |
-| [`docs/data-model.md`](./docs/data-model.md) | データモデル設計（Firestore スキーマ・反応区間構造） |
-| [`docs/repository-structure.md`](./docs/repository-structure.md) | リポジトリ構造 |
-| [`docs/development-guidelines.md`](./docs/development-guidelines.md) | 開発ガイドライン |
-| [`docs/glossary.md`](./docs/glossary.md) | 用語集 |
+| ファイル                                                             | 内容                                                 |
+| -------------------------------------------------------------------- | ---------------------------------------------------- |
+| [`docs/frontend-spec.md`](./docs/frontend-spec.md)                   | **仕様の source of truth**（Notion ミラー、SDD）     |
+| [`docs/product-requirements.md`](./docs/product-requirements.md)     | プロダクト要求定義（PRD）                            |
+| [`docs/architecture.md`](./docs/architecture.md)                     | アーキテクチャ設計                                   |
+| [`docs/functional-design.md`](./docs/functional-design.md)           | 機能設計                                             |
+| [`docs/setup.md`](./docs/setup.md)                                   | ローカル開発環境のセットアップ手順                   |
+| [`docs/data-model.md`](./docs/data-model.md)                         | データモデル設計（Firestore スキーマ・反応区間構造） |
+| [`docs/repository-structure.md`](./docs/repository-structure.md)     | リポジトリ構造                                       |
+| [`docs/development-guidelines.md`](./docs/development-guidelines.md) | 開発ガイドライン                                     |
+| [`docs/glossary.md`](./docs/glossary.md)                             | 用語集                                               |
 
 > Notion は git からの一方向ミラーです。**仕様の編集は git 側（`docs/`）で行ってください。**
-
-## 既知の問題 / 未実装機能（Day3 審査員向け）
-
-開発期間が短いため、Day3 提出時点で「ここまでやった／ここは諦めた」を正直に書く。
-**正直に書くことは減点ではなく加点要素**（自己評価力として審査される）。
-
-- 未実装：（記入）
-- 既知の問題：（記入）
-
-## 担当メンター・壁打ち履歴
-
-| 日時 | メンター | 議論内容（要点） | 採用 / 一部採用 / 不採用 |
-|---|---|---|---|
-| Day1 14:00 |  |  |  |
-| Day2 11:00 |  |  |  |
-
-## AI 活用ログ
-
-審査項目「AI 活用度」の根拠資料 → [`AI_USAGE_LOG.md`](./AI_USAGE_LOG.md)
-
-開発期間中に最低 1 日 3 件以上の追記を目安に。
-
-## 公開許諾（チーム全員合意のうえ記入 — Day3 終了時までに）
-
-提出後の運営側での扱いに関するチーム全員合意です。**いずれも N で構いません（審査に一切影響なし）**。
-
-| 項目 | 許諾 (Y/N) | 補足・条件 |
-|---|---|---|
-| ① このリポを **Public 化**してよい（コードがすべて公開される） | | |
-| ② プロダクト名・スクリーンショット・1行ピッチを **HTV / Mercari の SNS・記事**で掲載してよい | | |
-| ③ **スポンサー企業（Mercari, P&G 等）の広報・採用ページ**でプロダクト紹介してよい | | |
-
-## 審査観点（参考）
-
-審査は以下 8 項目で実施されます。実装中に意識すべきポイント：
-
-1. 実用性
-2. 創造性
-3. UI / UX
-4. 技術的挑戦
-5. 将来性
-6. 完成度
-7. プレゼンテーション
-8. AI 活用度（→ [`AI_USAGE_LOG.md`](./AI_USAGE_LOG.md) が根拠資料）
-
-## 謝辞（任意）
-
-スポンサー・メンター・運営への一言メッセージを残したい場合はここに記入。
-
-## 運営連絡先
-
-- Slack: `#eg-hackathon-2026-05`（または `#pjt_swe_event`）
-- 緊急時: 運営メンバー（Mercari HQ 受付 → 運営呼び出し）

@@ -10,6 +10,8 @@ struct ResonanceMatchView: View {
 
     @StateObject private var matchService = ResonanceMatchService()
     @State private var ignitionStart = Date.distantPast
+    // マッチ待機中のパルスアニメーション起点。cycleDuration ごとにリセットして演出を周回させる
+    @State private var pulseEpoch: Date = Date()
     @Environment(\.dismiss) private var dismiss
 
     init(songId: String, songTitle: String? = nil, myInterval: (start: TimeInterval, end: TimeInterval)) {
@@ -31,6 +33,13 @@ struct ResonanceMatchView: View {
                     }
                     .padding(.horizontal, 20)
                     .padding(.vertical, 16)
+                }
+                .task {
+                    while !Task.isCancelled, !hasSameSpot {
+                        try? await Task.sleep(for: .seconds(ResonanceVisualConfig.cycleDuration))
+                        guard !Task.isCancelled, !hasSameSpot else { break }
+                        pulseEpoch = Date()
+                    }
                 }
             }
             .preferredColorScheme(.dark)
@@ -58,7 +67,7 @@ struct ResonanceMatchView: View {
 
     private var ignitionArea: some View {
         ZStack {
-            QuantumIgnitionView(startDate: hasSameSpot ? ignitionStart : Date.distantPast)
+            QuantumIgnitionView(startDate: hasSameSpot ? ignitionStart : pulseEpoch)
                 .frame(height: 260)
             if !hasSameSpot {
                 VStack(spacing: 8) {

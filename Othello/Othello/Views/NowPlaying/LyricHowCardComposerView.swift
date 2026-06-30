@@ -20,6 +20,7 @@ struct LyricHowCardComposerView: View {
     @State private var isPosting = false
     @State private var postErrorMessage: String?
     @State private var didPost = false
+    @State private var showResonance = false
 
     var body: some View {
         NavigationStack {
@@ -31,6 +32,9 @@ struct LyricHowCardComposerView: View {
                         selectedLyricSection
                         commentSection
                         postButton
+                        if didPost {
+                            resonanceButton
+                        }
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 18)
@@ -54,6 +58,13 @@ struct LyricHowCardComposerView: View {
             }
             .navigationTitle("歌詞にコメント")
             .navigationBarTitleDisplayMode(.inline)
+            .fullScreenCover(isPresented: $showResonance) {
+                ResonanceMatchView(
+                    songId: song.firestoreSongID,
+                    songTitle: song.title,
+                    myInterval: (draft.songStart, draft.songEnd)
+                )
+            }
         }
     }
 
@@ -194,6 +205,29 @@ struct LyricHowCardComposerView: View {
         }
         .buttonStyle(.plain)
         .disabled(!canPost || isPosting || didPost)
+    }
+
+    private var resonanceButton: some View {
+        Button {
+            showResonance = true
+        } label: {
+            HStack(spacing: 8) {
+                Text("🔥")
+                Text("共鳴した人を見る")
+                    .font(.subheadline.bold())
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(
+                LinearGradient(
+                    colors: [Color(red: 1.0, green: 0.5, blue: 0.2), Color(red: 0.95, green: 0.2, blue: 0.15)],
+                    startPoint: .leading, endPoint: .trailing
+                ),
+                in: RoundedRectangle(cornerRadius: 14)
+            )
+        }
+        .buttonStyle(.plain)
     }
 
     private var canPost: Bool {

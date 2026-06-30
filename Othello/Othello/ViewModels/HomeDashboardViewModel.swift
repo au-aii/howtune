@@ -30,6 +30,7 @@ final class HomeDashboardViewModel: ObservableObject {
             comments = dashboardComments
             featuredArtists = makeFeaturedArtists(from: dashboardComments)
         } catch {
+            print("❌ fetchHowCards error:", error)
             errorMessage = message(for: error)
             if featuredArtists.isEmpty {
                 featuredArtists = Artist.catalog

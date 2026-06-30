@@ -116,20 +116,20 @@ iOS でテストユーザーを新規サインアップ → Firebase Console の
 
 ベース URL: `https://asia-northeast1-egh-howtune.cloudfunctions.net/api`
 
-| メソッド | パス | 認証 | 用途 |
-|---------|------|------|------|
-| GET | `/health` | ❌ | 死活確認 |
-| GET | `/how-cards` | ✅ | Howカードコメント一覧（デフォルト最新50件、最大250件） |
-| GET | `/how-cards?song_id=...` | ✅ | 曲ごとのHowカードコメント一覧 |
-| GET | `/how-cards/:id` | ✅ | Howカードコメント取得 |
-| GET | `/how-cards/:id/replies` | ✅ | Howカードへの返信一覧 |
-| POST | `/how-cards` | ✅ | Howカードコメント作成 |
-| PATCH | `/how-cards/:id` | ✅ | 自分のHowカードコメント更新 |
-| POST | `/how-cards/:id/like` | ✅ | いいね（冪等、二重防止） |
-| POST | `/how-cards/:id/replies` | ✅ | Howカードへ返信 |
-| GET | `/recommended-comments` | ✅ | Home dashboard 向けおすすめコメント一覧 |
-| GET | `/users/me` | ✅ | 自分のユーザー情報取得 |
-| PUT | `/users/me` | ✅ | 自分のユーザー情報作成・更新 |
+| メソッド | パス                     | 認証 | 用途                                                   |
+| -------- | ------------------------ | ---- | ------------------------------------------------------ |
+| GET      | `/health`                | ❌   | 死活確認                                               |
+| GET      | `/how-cards`             | ✅   | Howカードコメント一覧（デフォルト最新50件、最大250件） |
+| GET      | `/how-cards?song_id=...` | ✅   | 曲ごとのHowカードコメント一覧                          |
+| GET      | `/how-cards/:id`         | ✅   | Howカードコメント取得                                  |
+| GET      | `/how-cards/:id/replies` | ✅   | Howカードへの返信一覧                                  |
+| POST     | `/how-cards`             | ✅   | Howカードコメント作成                                  |
+| PATCH    | `/how-cards/:id`         | ✅   | 自分のHowカードコメント更新                            |
+| POST     | `/how-cards/:id/like`    | ✅   | いいね（冪等、二重防止）                               |
+| POST     | `/how-cards/:id/replies` | ✅   | Howカードへ返信                                        |
+| GET      | `/recommended-comments`  | ✅   | Home dashboard 向けおすすめコメント一覧                |
+| GET      | `/users/me`              | ✅   | 自分のユーザー情報取得                                 |
+| PUT      | `/users/me`              | ✅   | 自分のユーザー情報作成・更新                           |
 
 ### `POST /how-cards`
 
@@ -148,14 +148,14 @@ iOS でテストユーザーを新規サインアップ → Firebase Console の
 }
 ```
 
-| フィールド | 型 | 説明 |
-|-----------|-----|------|
-| `comment` | string | ユーザー記入のコメント（空文字不可） |
-| `song_start` | number | 区間開始（秒、0 以上） |
-| `song_end` | number | 区間終了（秒、`song_start` より大きい） |
-| `song_id` | string | MusicKit / Apple Music / iTunes の数値曲 ID（例: `1704093812`）。slug や表示名は不可 |
-| `song_slug` | string | 任意。表示・移行用の曲 slug。`song_id` には入れない |
-| `artist_id` | string | アーティスト ID |
+| フィールド   | 型     | 説明                                                                                 |
+| ------------ | ------ | ------------------------------------------------------------------------------------ |
+| `comment`    | string | ユーザー記入のコメント（空文字不可）                                                 |
+| `song_start` | number | 区間開始（秒、0 以上）                                                               |
+| `song_end`   | number | 区間終了（秒、`song_start` より大きい）                                              |
+| `song_id`    | string | MusicKit / Apple Music / iTunes の数値曲 ID（例: `1704093812`）。slug や表示名は不可 |
+| `song_slug`  | string | 任意。表示・移行用の曲 slug。`song_id` には入れない                                  |
+| `artist_id`  | string | アーティスト ID                                                                      |
 
 `song_id` は client が MusicKit metadata lookup に使う canonical ID とする。slug や曲名由来の値は `song_slug` など別フィールドで送る。
 
@@ -398,3 +398,44 @@ cd functions
 npm install
 npx firebase-tools emulators:start --only functions,firestore
 ```
+
+---
+
+## Resonance デモ用シードデータ投入
+
+`scripts/seed-resonance.js` は Resonance マッチングのデモ用データを Firestore に投入します。
+1 台の実機のみで🔥同地点マッチを体験できるようになります。
+
+### 前提条件
+
+- Node.js 18 以上
+- Firebase Admin SDK（`npm install`）
+- サービスアカウントキー（`serviceAccountKey.json`）
+
+### サービスアカウントキーの取得
+
+1. [Firebase Console](https://console.firebase.google.com/) → プロジェクト設定 → サービスアカウント
+2. 「新しい秘密鍵を生成」をクリック
+3. ダウンロードした JSON を `functions/serviceAccountKey.json` に配置する（`.gitignore` 対象）
+
+### 実行手順
+
+```bash
+cd functions
+npm install
+
+# dry-run（書き込みなし・内容確認）
+node scripts/seed-resonance.js
+
+# 実際に投入
+GOOGLE_APPLICATION_CREDENTIALS=serviceAccountKey.json node scripts/seed-resonance.js --write
+```
+
+### 投入されるデータ
+
+- デモユーザー 3 名（あおい・れん・みお）
+- HowCard 5 件（20s / 44s / 77s / 116s / 158s）
+- 曲 ID: `howtune-demo-song`（アプリ内 `ResonanceDemo.songId` と一致）
+
+アプリで HowChat フロー（ホーム画面 → AirPods 反応検出 → HowChat）を使い、
+`howtune-demo-song` に紐づく HowCard を投稿すると Resonance 画面に🔥マッチが表示されます。
