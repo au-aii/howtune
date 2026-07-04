@@ -79,7 +79,7 @@
   - 検証: deploy 成功ログ。成功したら how-card を1件書いて `song_insights` が自動更新されるか確認（`/opt/homebrew/opt/node@22/bin/node scripts/seed-insights.js --write` の後 song_insights が更新）
   - **ブロック時**: Eventarc/PubSub IAM 権限エラー（project owner 必要）なら `[blocked]` にし、下の「ブロック記録」に必要ロール（例 roles/eventarc.admin, roles/pubsub.admin, roles/run.invoker）と `gcloud` 付与コマンド、正確なエラーを残してユーザーに委ねる。**IAM を勝手に変更しない**。
 
-- [ ] **T2-2: iOS 一時ログアウト → 設定画面の正式ログアウト**
+- [x] **T2-2: iOS 一時ログアウト → 設定画面の正式ログアウト** ✅ xcodebuild BUILD SUCCEEDED
   - 対象: iOS（`Othello/`）。まず現状の「一時ログアウトボタン」を grep で特定 → 設定画面（無ければ最小の Settings ビュー）にログアウトを移す
   - 検証: `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project Othello/Othello.xcodeproj -scheme Othello -destination 'generic/platform=iOS Simulator' build` が green
   - **設計判断が要るなら**（設定画面の構成など）`[blocked]` にして案を2つ残す
@@ -117,3 +117,4 @@
 - 2026-07-05 T1-3 完了: architecture/repository-structure/PRD に web/ サーフェス追記。
 - 2026-07-05 T1-4: web ビルド green → personal に push → PR #8 作成。マージは分類器ブロックでユーザー待ち。
 - 2026-07-05 T2-1 完了: onHowCardWritten を本番デプロイ＋発火検証（自動再集計 OK）。node20 runtime 廃止予定(2026-10-30)は将来対応。
+- 2026-07-05 T2-2 完了: SettingsView 新設＋ContentView の一時ログアウトを歯車→設定シートに昇格。xcodebuild green。

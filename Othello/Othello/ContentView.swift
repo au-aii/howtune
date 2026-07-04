@@ -7,6 +7,7 @@ struct ContentView: View {
     @StateObject private var airPods = AirPodsMotionViewModel()
     @State private var nowPlayingContext: NowPlayingContext?
     @State private var showNowPlaying: Bool = false
+    @State private var showSettings: Bool = false
 
     var body: some View {
         if !authVM.isLoggedIn {
@@ -38,12 +39,11 @@ struct ContentView: View {
 
             bottomOverlay
         }
-        // TODO: 検証用の一時ログアウトボタン。認証画面の確認が済んだら削除する
         .overlay(alignment: .topLeading) {
             Button {
-                authVM.signOut()
+                showSettings = true
             } label: {
-                Image(systemName: "rectangle.portrait.and.arrow.right")
+                Image(systemName: "gearshape")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(Color(.label))
                     .padding(10)
@@ -51,6 +51,10 @@ struct ContentView: View {
             }
             .padding(.leading, 16)
             .padding(.top, 8)
+            .accessibilityLabel("設定")
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView(authVM: authVM)
         }
         .task {
             await playback.onAppear()
