@@ -16,7 +16,7 @@ struct ReactionDisplayView: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color(.systemBackground).ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: 24) {
@@ -60,7 +60,7 @@ struct ReactionDisplayView: View {
             Text(lyric).font(.title3.bold()).foregroundStyle(.white)
                 .fixedSize(horizontal: false, vertical: true)
             if let translation {
-                Text(translation).font(.subheadline).foregroundStyle(.gray)
+                Text(translation).font(.subheadline).foregroundStyle(Color(.secondaryLabel))
             }
         }
         .padding(16)
@@ -78,10 +78,10 @@ struct ReactionDisplayView: View {
     private var noLyricPlaceholder: some View {
         VStack(spacing: 10) {
             Image(systemName: "text.bubble").font(.system(size: 36)).foregroundStyle(.gray.opacity(0.4))
-            Text("歌詞を選んでHowカードを作ろう").font(.subheadline).foregroundStyle(.gray).multilineTextAlignment(.center)
+            Text("歌詞を選んでHowカードを作ろう").font(.subheadline).foregroundStyle(Color(.secondaryLabel)).multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity).padding(28)
-        .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 16))
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
     }
 
     private var commentSection: some View {
@@ -92,25 +92,25 @@ struct ReactionDisplayView: View {
                     .foregroundStyle(Color(red: 1.0, green: 0.3, blue: 0.3))
                 Text("コメント")
                     .font(.subheadline.bold())
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.label))
                 Spacer()
                 Text("\(commentText.count)/140")
                     .font(.caption.monospacedDigit())
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
             }
 
             ZStack(alignment: .topLeading) {
                 if commentText.isEmpty {
                     Text("この曲のここが好き")
                         .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.32))
+                        .foregroundStyle(Color(.tertiaryLabel))
                         .padding(.horizontal, 14)
                         .padding(.vertical, 13)
                 }
 
                 TextEditor(text: $commentText)
                     .font(.subheadline)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.label))
                     .scrollContentBackground(.hidden)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 8)
@@ -121,17 +121,17 @@ struct ReactionDisplayView: View {
                         }
                     }
             }
-            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1))
+                .stroke(Color(.separator), lineWidth: 1))
         }
         .padding(16)
-        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 16))
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
     }
 
     private var howTagGrid: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("このフレーズでの気持ちは？").font(.subheadline.bold()).foregroundStyle(.white)
+            Text("このフレーズでの気持ちは？").font(.subheadline.bold()).foregroundStyle(Color(.label))
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                     ForEach(HowTag.scoreCases, id: \.self) { tag in
@@ -158,7 +158,7 @@ struct ReactionDisplayView: View {
             }
         }
         .padding(16)
-        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 16))
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
     }
 
     private var postButton: some View {

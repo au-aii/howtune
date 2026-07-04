@@ -27,10 +27,10 @@ struct SignUpView: View {
                     VStack(spacing: 6) {
                         Text("アカウント作成")
                             .font(.title2.bold())
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color(.label))
                         Text("メールアドレスで登録")
                             .font(.subheadline)
-                            .foregroundStyle(.gray)
+                            .foregroundStyle(Color(.secondaryLabel))
                     }
                     .padding(.top, 8)
 
@@ -41,7 +41,7 @@ struct SignUpView: View {
                                 .keyboardType(.emailAddress)
                                 .autocorrectionDisabled()
                                 .textInputAutocapitalization(.never)
-                                .foregroundStyle(.white)
+                                .foregroundStyle(Color(.label))
                                 .focused($focus, equals: .email)
                                 .submitLabel(.next)
                                 .onSubmit { focus = .password }
@@ -49,7 +49,7 @@ struct SignUpView: View {
 
                         fieldRow(icon: "lock") {
                             SecureField("パスワード（6文字以上）", text: $password)
-                                .foregroundStyle(.white)
+                                .foregroundStyle(Color(.label))
                                 .focused($focus, equals: .password)
                                 .submitLabel(.next)
                                 .onSubmit { focus = .confirmPassword }
@@ -57,7 +57,7 @@ struct SignUpView: View {
 
                         fieldRow(icon: "lock.fill") {
                             SecureField("パスワード確認", text: $passwordConfirm)
-                                .foregroundStyle(.white)
+                                .foregroundStyle(Color(.label))
                                 .focused($focus, equals: .confirmPassword)
                                 .submitLabel(.done)
                                 .onSubmit { if canSubmit { Task { await authVM.signUp(email: email, password: password) } } }
@@ -111,7 +111,7 @@ struct SignUpView: View {
     private func fieldRow<Content: View>(icon: String, @ViewBuilder content: () -> Content) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .foregroundStyle(.gray)
+                .foregroundStyle(Color(.secondaryLabel))
                 .frame(width: 20)
             content()
         }
@@ -119,7 +119,7 @@ struct SignUpView: View {
         .background(HowTuneDesign.surface, in: RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                .stroke(Color(.systemGray4), lineWidth: 1)
         )
     }
 }

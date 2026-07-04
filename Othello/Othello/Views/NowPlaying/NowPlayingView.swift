@@ -27,7 +27,7 @@ struct NowPlayingView: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color(.systemBackground).ignoresSafeArea()
             VStack(spacing: 0) {
                 topBar
                 mainContent
@@ -44,7 +44,7 @@ struct NowPlayingView: View {
             LyricHowCardComposerView(song: song, draft: draft)
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
-                .presentationBackground(Color.black)
+                .presentationBackground(Color(.systemBackground))
         }
     }
 
@@ -88,9 +88,9 @@ struct NowPlayingView: View {
             } label: {
                 Image(systemName: "chevron.left")
                     .font(.title3.weight(.semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.label))
                     .frame(width: 40, height: 40)
-                    .background(Color.white.opacity(0.1), in: Circle())
+                    .background(Color(.secondarySystemBackground), in: Circle())
             }
             .accessibilityLabel("戻る")
 
@@ -123,10 +123,10 @@ struct NowPlayingView: View {
             Text(song.title)
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(.label))
             Text(song.artistName)
                 .font(.subheadline)
-                .foregroundStyle(.gray)
+                .foregroundStyle(Color(.secondaryLabel))
         }
         .padding(.bottom, 8)
     }
@@ -140,7 +140,7 @@ struct NowPlayingView: View {
                 let width = proxy.size.width
                 ZStack(alignment: .leading) {
                     Capsule()
-                        .fill(Color.white.opacity(0.14))
+                        .fill(Color(.separator))
                     if context.hasHighlight {
                         let highlightStartX = width * highlightStartProgress
                         let desiredHighlightWidth = width * max(0.02, highlightEndProgress - highlightStartProgress)
@@ -167,7 +167,7 @@ struct NowPlayingView: View {
                 HStack {
                     Text("選択中 \(highlightRangeText)")
                         .font(.caption2.monospacedDigit().weight(.semibold))
-                        .foregroundStyle(Color(red: 1.0, green: 0.3, blue: 0.3))
+                        .foregroundStyle(HowTuneDesign.accent)
                     Spacer()
                 }
             }
@@ -190,7 +190,7 @@ struct NowPlayingView: View {
                 Text(formatTime(duration))
             }
             .font(.caption.monospacedDigit())
-            .foregroundStyle(.white.opacity(0.64))
+            .foregroundStyle(Color(.secondaryLabel))
         }
         .padding(.horizontal, 28)
         .padding(.top, 10)
@@ -288,7 +288,7 @@ struct NowPlayingView: View {
     private func lyricsStatusMessage(_ message: String) -> some View {
         Text(message)
             .font(.title3.weight(.bold))
-            .foregroundStyle(.white.opacity(0.64))
+            .foregroundStyle(Color(.secondaryLabel))
             .lineLimit(nil)
             .fixedSize(horizontal: false, vertical: true)
             .padding(.vertical, 48)
@@ -517,10 +517,10 @@ struct NowPlayingView: View {
             footerTabButton(tab: .rangeSelection, title: "範囲選択", systemImage: "slider.horizontal.3")
         }
         .padding(4)
-        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 30, style: .continuous))
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 30, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 30, style: .continuous)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                .stroke(Color(.separator), lineWidth: 1)
         )
         .padding(.horizontal, 20)
         .padding(.bottom, 32)

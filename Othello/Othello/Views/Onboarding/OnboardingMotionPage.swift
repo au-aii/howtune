@@ -28,10 +28,10 @@ struct OnboardingMotionPage: View {
                     VStack(spacing: 10) {
                         Text("AirPods 頭部モーションの使用")
                             .font(.title2.bold())
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color(.label))
                         Text("音楽を聴いているときの頭の動きを検知します。あなたの「聴き方」の特徴を分析するためだけに使用します。")
                             .font(.body)
-                            .foregroundStyle(.gray)
+                            .foregroundStyle(Color(.secondaryLabel))
                             .multilineTextAlignment(.center)
                     }
                     .padding(.horizontal, 32)

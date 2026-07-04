@@ -7,22 +7,22 @@ struct HowCardReplyRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
             Circle()
-                .fill(Color.white.opacity(0.12))
+                .fill(Color(.secondarySystemBackground))
                 .frame(width: 32, height: 32)
                 .overlay {
                     Text(avatarLetter)
                         .font(.caption.bold())
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color(.label))
                 }
 
             VStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 6) {
                     Text(displayName)
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color(.label))
                     Text(relativeTime)
                         .font(.caption2)
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(Color(.secondaryLabel))
                 }
                 Text(reply.body)
                     .font(.subheadline)
@@ -33,7 +33,7 @@ struct HowCardReplyRow: View {
             Spacer(minLength: 0)
         }
         .padding(12)
-        .background(Color.white.opacity(0.045), in: RoundedRectangle(cornerRadius: 10))
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
     }
 
     private var displayName: String {

@@ -10,7 +10,7 @@ struct RealtimeReactionDisplayView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color(.systemBackground).ignoresSafeArea()
 
                 ScrollView {
                     VStack(spacing: 20) {
@@ -69,13 +69,13 @@ struct RealtimeReactionDisplayView: View {
                     .transition(.opacity)
                 Text("いまの状態")
                     .font(.caption)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
             } else if viewModel.isSessionActive {
                 ProgressView()
                     .tint(.gray)
                 Text("反応を検出中…")
                     .font(.caption)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
                     .padding(.top, 4)
             } else {
                 Image(systemName: "waveform.path")
@@ -83,14 +83,14 @@ struct RealtimeReactionDisplayView: View {
                     .foregroundStyle(.gray.opacity(0.4))
                 Text("リスニング開始で\nリアルタイム反応を表示")
                     .font(.subheadline)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
                     .multilineTextAlignment(.center)
             }
         }
         .frame(maxWidth: .infinity)
         .frame(minHeight: 130)
         .padding(20)
-        .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 16))
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
         .animation(.spring(duration: 0.4), value: viewModel.score.dominant?.id)
         .animation(.easeInOut(duration: 0.3), value: viewModel.isSessionActive)
     }
@@ -125,7 +125,7 @@ struct RealtimeReactionDisplayView: View {
             }
         }
         .padding(20)
-        .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 16))
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
         .animation(.easeInOut(duration: 0.15), value: viewModel.score)
     }
 
@@ -139,7 +139,7 @@ struct RealtimeReactionDisplayView: View {
                     .foregroundStyle(.white)
                 Text("センサーが使えないため、ボタンで反応を記録します")
                     .font(.caption2)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
             }
         }
         .padding(14)

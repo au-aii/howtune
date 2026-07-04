@@ -24,7 +24,7 @@ struct HowCardCreationView: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color(.systemBackground).ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: 24) {
@@ -65,14 +65,14 @@ struct HowCardCreationView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "quote.opening")
                         .font(.caption.bold())
-                        .foregroundStyle(Color(red: 1.0, green: 0.3, blue: 0.3))
+                        .foregroundStyle(HowTuneDesign.accent)
                     Text("この瞬間のフレーズ")
                         .font(.caption.bold())
-                        .foregroundStyle(Color(red: 1.0, green: 0.3, blue: 0.3))
+                        .foregroundStyle(HowTuneDesign.accent)
                     Spacer()
                     Text(formatTime(event.startTime))
                         .font(.caption.monospacedDigit())
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(Color(.secondaryLabel))
                 }
                 Text(lyric)
                     .font(.title3.bold())
@@ -81,7 +81,7 @@ struct HowCardCreationView: View {
                 if let translation = event.lyricTranslation {
                     Text(translation)
                         .font(.subheadline)
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(Color(.secondaryLabel))
                 }
             }
             .padding(16)
@@ -94,19 +94,19 @@ struct HowCardCreationView: View {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color(red: 1.0, green: 0.3, blue: 0.3).opacity(0.25), lineWidth: 1)
+                    .stroke(HowTuneDesign.accent.opacity(0.25), lineWidth: 1)
             )
         } else {
             HStack(spacing: 10) {
                 Image(systemName: "waveform")
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
                 Text(formatTime(event.startTime) + " の反応区間")
                     .font(.subheadline)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
                 Spacer()
             }
             .padding(16)
-            .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 16))
+            .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
         }
     }
 
@@ -117,28 +117,28 @@ struct HowCardCreationView: View {
             HStack(spacing: 6) {
                 Image(systemName: "text.bubble.fill")
                     .font(.caption.bold())
-                    .foregroundStyle(Color(red: 1.0, green: 0.3, blue: 0.3))
+                    .foregroundStyle(HowTuneDesign.accent)
                 Text("コメント")
                     .font(.subheadline.bold())
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.label))
                 Spacer()
                 Text("\(commentText.count)/140")
                     .font(.caption.monospacedDigit())
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
             }
 
             ZStack(alignment: .topLeading) {
                 if commentText.isEmpty {
                     Text("この曲のここが好き")
                         .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.32))
+                        .foregroundStyle(Color(.tertiaryLabel))
                         .padding(.horizontal, 14)
                         .padding(.vertical, 13)
                 }
 
                 TextEditor(text: $commentText)
                     .font(.subheadline)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.label))
                     .scrollContentBackground(.hidden)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 8)
@@ -149,14 +149,14 @@ struct HowCardCreationView: View {
                         }
                     }
             }
-            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                    .stroke(Color(.separator), lineWidth: 1)
             )
         }
         .padding(16)
-        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 16))
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
     }
 
     // MARK: - タグ選択
@@ -165,7 +165,7 @@ struct HowCardCreationView: View {
         VStack(alignment: .leading, spacing: 14) {
             Text("気持ちのタグ（複数選択可）")
                 .font(.subheadline.bold())
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(.label))
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                 ForEach(HowTag.scoreCases, id: \.self) { tag in
@@ -182,7 +182,7 @@ struct HowCardCreationView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 18)
                         .background(
-                            isSelected ? tag.color.opacity(0.2) : Color.white.opacity(0.05),
+                            isSelected ? tag.color.opacity(0.2) : Color(.secondarySystemBackground),
                             in: RoundedRectangle(cornerRadius: 14)
                         )
                         .overlay(
@@ -196,7 +196,7 @@ struct HowCardCreationView: View {
             }
         }
         .padding(16)
-        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 16))
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
     }
 
     // MARK: - 投稿ボタン
@@ -252,7 +252,7 @@ struct HowCardCreationView: View {
             VStack(spacing: 16) {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 56))
-                    .foregroundStyle(Color(red: 1.0, green: 0.3, blue: 0.3))
+                    .foregroundStyle(HowTuneDesign.accent)
                 Text("Howカードを投稿しました")
                     .font(.title3.bold())
                     .foregroundStyle(.white)

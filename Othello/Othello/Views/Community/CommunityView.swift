@@ -7,7 +7,7 @@ struct CommunityView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color(.systemBackground).ignoresSafeArea()
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
@@ -44,7 +44,7 @@ struct CommunityView: View {
                 if viewModel.selectedTag != nil {
                     Button("クリア") { viewModel.selectedTag = nil }
                         .font(.caption.bold())
-                        .foregroundStyle(Color(red: 1.0, green: 0.3, blue: 0.3))
+                        .foregroundStyle(HowTuneDesign.accent)
                 }
             }
             .padding(.horizontal, 20)
@@ -122,7 +122,7 @@ struct CommunityView: View {
                         ListenerRow(listener: listener)
                     }
                 }
-                .background(Color.white.opacity(0.03), in: RoundedRectangle(cornerRadius: 14))
+                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
                 .padding(.horizontal, 20)
             }
         }
@@ -146,7 +146,7 @@ struct CommunityView: View {
                         PopularTrackRow(track: track, rank: index + 1)
                     }
                 }
-                .background(Color.white.opacity(0.03), in: RoundedRectangle(cornerRadius: 14))
+                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
                 .padding(.horizontal, 20)
             }
         }
@@ -159,10 +159,10 @@ struct CommunityView: View {
         HStack(spacing: 6) {
             Image(systemName: icon)
                 .font(.caption.bold())
-                .foregroundStyle(Color(red: 1.0, green: 0.3, blue: 0.3))
+                .foregroundStyle(HowTuneDesign.accent)
             Text(title)
                 .font(.headline)
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(.label))
         }
         .padding(.horizontal, 20)
     }
@@ -174,7 +174,7 @@ struct CommunityView: View {
                 .foregroundStyle(.gray.opacity(0.4))
             Text(message)
                 .font(.subheadline)
-                .foregroundStyle(.gray)
+                .foregroundStyle(Color(.secondaryLabel))
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
@@ -208,7 +208,7 @@ private struct HowTagChip: View {
             .background(
                 isSelected
                     ? tag.color.opacity(0.25)
-                    : Color.white.opacity(0.07),
+                    : Color(.secondarySystemBackground),
                 in: Capsule()
             )
             .overlay(
@@ -237,17 +237,17 @@ private struct MyHowCardView: View {
                 Spacer()
                 Text(card.createdAt)
                     .font(.caption2)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
             }
 
             Text(card.title)
                 .font(.subheadline.bold())
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(.label))
                 .lineLimit(2)
 
             Text(card.description)
                 .font(.caption)
-                .foregroundStyle(.gray)
+                .foregroundStyle(Color(.secondaryLabel))
                 .lineLimit(3)
 
             Spacer()
@@ -255,16 +255,16 @@ private struct MyHowCardView: View {
             HStack(spacing: 4) {
                 Image(systemName: "music.note")
                     .font(.caption2)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
                 Text(card.trackTitle)
                     .font(.caption2)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
                     .lineLimit(1)
             }
         }
         .padding(14)
         .frame(width: 200, height: 160)
-        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
                 .stroke(card.tag.color.opacity(0.2), lineWidth: 1)
@@ -291,10 +291,10 @@ private struct ListenerRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(listener.name)
                     .font(.subheadline.bold())
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.label))
                 Text(listener.howTitle)
                     .font(.caption)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
                     .lineLimit(1)
             }
 
@@ -310,7 +310,7 @@ private struct ListenerRow: View {
                 if listener.mutualCount > 0 {
                     Text("共通 \(listener.mutualCount)")
                         .font(.caption2)
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(Color(.secondaryLabel))
                 }
             }
         }
@@ -332,12 +332,12 @@ private struct PopularTrackRow: View {
         HStack(spacing: 12) {
             Text("\(rank)")
                 .font(.caption.bold().monospacedDigit())
-                .foregroundStyle(rank <= 3 ? Color(red: 1.0, green: 0.3, blue: 0.3) : .gray)
+                .foregroundStyle(rank <= 3 ? HowTuneDesign.accent : Color(.secondaryLabel))
                 .frame(width: 20)
 
             ZStack {
                 RoundedRectangle(cornerRadius: 6)
-                    .fill(Color.white.opacity(0.08))
+                    .fill(Color(.secondarySystemBackground))
                     .frame(width: 38, height: 38)
                 Image(systemName: "music.note")
                     .font(.caption)
@@ -347,11 +347,11 @@ private struct PopularTrackRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(track.trackTitle)
                     .font(.subheadline.bold())
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.label))
                     .lineLimit(1)
                 Text(track.trackArtist)
                     .font(.caption)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
             }
 
             Spacer()
@@ -362,7 +362,7 @@ private struct PopularTrackRow: View {
                     .foregroundStyle(track.howTag.color)
                 Text("\(track.howCount) How")
                     .font(.caption2)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
             }
         }
         .padding(.horizontal, 14)

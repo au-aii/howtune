@@ -25,7 +25,7 @@ struct LyricHowCardComposerView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color(.systemBackground).ignoresSafeArea()
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
@@ -48,9 +48,9 @@ struct LyricHowCardComposerView: View {
                     } label: {
                         Image(systemName: "xmark")
                             .font(.subheadline.weight(.bold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color(.label))
                             .frame(width: 34, height: 34)
-                            .background(Color.white.opacity(0.12), in: Circle())
+                            .background(Color(.secondarySystemBackground), in: Circle())
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("閉じる")
@@ -82,17 +82,17 @@ struct LyricHowCardComposerView: View {
 
             Text(draft.lyricText)
                 .font(.title3.weight(.heavy))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(.label))
                 .lineSpacing(4)
                 .fixedSize(horizontal: false, vertical: true)
 
             miniRangeBar
         }
         .padding(16)
-        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                .stroke(Color(.separator), lineWidth: 1)
         )
     }
 
@@ -107,7 +107,7 @@ struct LyricHowCardComposerView: View {
 
             ZStack(alignment: .leading) {
                 Capsule()
-                    .fill(Color.white.opacity(0.12))
+                    .fill(Color(.secondarySystemBackground))
                 Capsule()
                     .fill(
                         LinearGradient(
@@ -132,25 +132,25 @@ struct LyricHowCardComposerView: View {
             HStack {
                 Text("感想")
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
                 Spacer()
                 Text("\(commentText.count)/140")
                     .font(.caption.monospacedDigit())
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
             }
 
             ZStack(alignment: .topLeading) {
                 if commentText.isEmpty {
                     Text("この一行で感じたこと")
                         .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.32))
+                        .foregroundStyle(Color(.tertiaryLabel))
                         .padding(.horizontal, 14)
                         .padding(.vertical, 13)
                 }
 
                 TextEditor(text: $commentText)
                     .font(.subheadline)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.label))
                     .scrollContentBackground(.hidden)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 8)
@@ -162,10 +162,10 @@ struct LyricHowCardComposerView: View {
                         }
                     }
             }
-            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                    .stroke(Color(.separator), lineWidth: 1)
             )
 
             if let postErrorMessage {

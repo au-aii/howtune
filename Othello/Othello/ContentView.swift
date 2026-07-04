@@ -31,7 +31,7 @@ struct ContentView: View {
 
     private var mainView: some View {
         ZStack(alignment: .bottom) {
-            Color.black.ignoresSafeArea()
+            Color(.systemBackground).ignoresSafeArea()
 
             ForYouView(nowPlayingContext: $nowPlayingContext, playback: playback)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -45,7 +45,7 @@ struct ContentView: View {
             } label: {
                 Image(systemName: "rectangle.portrait.and.arrow.right")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.label))
                     .padding(10)
                     .background(.ultraThinMaterial, in: Circle())
             }

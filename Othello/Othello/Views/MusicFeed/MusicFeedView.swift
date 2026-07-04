@@ -35,7 +35,7 @@ struct MusicFeedView: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color(.systemBackground).ignoresSafeArea()
             VStack(spacing: 0) {
                 navigationBar
                 songTabBar
@@ -59,17 +59,17 @@ struct MusicFeedView: View {
         HStack {
             Button { dismiss() } label: {
                 Image(systemName: "chevron.left")
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.label))
                     .font(.title3)
             }
             Spacer()
             Text(artist.name)
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(.label))
             Spacer()
             Image(systemName: "magnifyingglass")
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(.label))
                 .font(.title3)
         }
         .padding(.horizontal, 20)
@@ -91,7 +91,7 @@ struct MusicFeedView: View {
     private func songTabButton(index: Int, song: Song) -> some View {
         let isSelected: Bool = viewModel.selectedSongIndex == index
         let gradient = LinearGradient(colors: song.gradientColors, startPoint: .topLeading, endPoint: .bottomTrailing)
-        let bgColor: Color = isSelected ? Color.white.opacity(0.12) : Color.clear
+        let bgColor: Color = isSelected ? Color(.secondarySystemBackground) : Color.clear
         return Button {
             withAnimation(.easeInOut(duration: 0.2)) {
                 viewModel.selectedSongIndex = index
@@ -104,7 +104,7 @@ struct MusicFeedView: View {
                 Text(song.title)
                     .font(.subheadline)
                     .fontWeight(isSelected ? .bold : .regular)
-                    .foregroundStyle(isSelected ? .white : Color.gray)
+                    .foregroundStyle(isSelected ? Color(.label) : Color(.secondaryLabel))
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 9)
@@ -173,10 +173,10 @@ struct MusicFeedView: View {
         VStack(spacing: 10) {
             Image(systemName: systemImage)
                 .font(.title2)
-                .foregroundStyle(.gray)
+                .foregroundStyle(Color(.secondaryLabel))
             Text(message)
                 .font(.subheadline)
-                .foregroundStyle(.gray)
+                .foregroundStyle(Color(.secondaryLabel))
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 32)

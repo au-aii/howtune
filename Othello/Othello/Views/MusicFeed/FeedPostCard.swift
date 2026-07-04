@@ -25,33 +25,33 @@ struct FeedPostCard: View {
                         Text(post.userName)
                             .font(.subheadline)
                             .fontWeight(.semibold)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color(.label))
                         Image(systemName: "checkmark.seal.fill")
                             .font(.caption2)
-                            .foregroundStyle(Color(red: 1.0, green: 0.3, blue: 0.3))
+                            .foregroundStyle(HowTuneDesign.accent)
                     }
                     Text("\(post.userHandle) · \(post.timeAgo)")
                         .font(.caption)
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(Color(.secondaryLabel))
                 }
                 Spacer()
                 if isSelected {
                     Text("選択中")
                         .font(.caption2.weight(.heavy))
-                        .foregroundStyle(.black)
+                        .foregroundStyle(.white)
                         .padding(.horizontal, 9)
                         .padding(.vertical, 5)
-                        .background(.white, in: Capsule())
+                        .background(HowTuneDesign.accent, in: Capsule())
                 } else {
                     Image(systemName: "ellipsis")
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(Color(.secondaryLabel))
                         .font(.subheadline)
                 }
             }
 
             Text(post.comment)
                 .font(.subheadline)
-                .foregroundStyle(Color.white.opacity(0.85))
+                .foregroundStyle(Color(.label))
                 .lineLimit(3)
 
             MiniSongCard(context: post.playbackContext, onTap: onSongTap)
@@ -66,24 +66,24 @@ struct FeedPostCard: View {
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: isLiked ? "heart.fill" : "heart")
-                            .foregroundStyle(isLiked ? Color(red: 1.0, green: 0.3, blue: 0.3) : .white)
+                            .foregroundStyle(isLiked ? HowTuneDesign.accent : Color(.secondaryLabel))
                         Text("\(post.likeCount + (isLiked ? 1 : 0))")
                             .font(.subheadline)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color(.secondaryLabel))
                     }
                 }
                 Button(action: onReply) {
                     HStack(spacing: 6) {
                         Image(systemName: "bubble.left")
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color(.secondaryLabel))
                         Text("\(post.commentCount)")
                             .font(.subheadline)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color(.secondaryLabel))
                     }
                 }
                 Spacer()
                 Image(systemName: "paperplane")
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
             }
         }
         .padding(16)
@@ -91,20 +91,15 @@ struct FeedPostCard: View {
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(
-                    Color(red: 1.0, green: 0.3, blue: 0.3).opacity(isSelected ? 0.24 : 0),
+                    HowTuneDesign.accent.opacity(isSelected ? 0.24 : 0),
                     lineWidth: 1
                 )
         )
     }
 
-    private var cardBackground: LinearGradient {
-        LinearGradient(
-            colors: [
-                Color(red: 1.0, green: 0.3, blue: 0.3).opacity(isSelected ? 0.12 : 0.05),
-                Color.white.opacity(0.05)
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+    private var cardBackground: Color {
+        isSelected
+            ? HowTuneDesign.accent.opacity(0.14)
+            : Color(.secondarySystemBackground)
     }
 }

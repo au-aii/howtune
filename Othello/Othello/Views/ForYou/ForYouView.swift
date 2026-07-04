@@ -4,7 +4,6 @@ struct ForYouView: View {
     @Binding var nowPlayingContext: NowPlayingContext?
     @ObservedObject var playback: PlaybackViewModel
     @StateObject private var dashboard = HomeDashboardViewModel()
-    @AppStorage("prefersDarkTheme") var prefersDarkTheme = true
     @State private var searchQuery = ""
     @State private var selectedArtist: Artist?
     @State private var selectedComment: HomeDashboardComment?
@@ -13,7 +12,7 @@ struct ForYouView: View {
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottom) {
-                Color.black.ignoresSafeArea()
+                Color(.systemBackground).ignoresSafeArea()
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
@@ -28,20 +27,6 @@ struct ForYouView: View {
                 .refreshable {
                     await dashboard.load(force: true)
                 }
-            }
-            .overlay(alignment: .topTrailing) {
-                Button {
-                    withAnimation { prefersDarkTheme.toggle() }
-                } label: {
-                    Image(systemName: prefersDarkTheme ? "moon.fill" : "sun.max.fill")
-                        .font(.subheadline)
-                        .foregroundStyle(.white)
-                        .frame(width: 36, height: 36)
-                        .background(.white.opacity(0.12), in: Circle())
-                }
-                .buttonStyle(.plain)
-                .padding(.top, 8)
-                .padding(.trailing, 16)
             }
             .navigationBarHidden(true)
             .navigationDestination(item: $selectedArtist) { artist in
@@ -87,26 +72,26 @@ struct ForYouView: View {
     private var searchBar: some View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
-                .foregroundStyle(.white.opacity(0.42))
+                .foregroundStyle(Color(.tertiaryLabel))
             TextField("アーティスト、曲、コメント", text: $searchQuery)
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(.label))
                 .submitLabel(.search)
             if !searchQuery.isEmpty {
                 Button {
                     searchQuery = ""
                 } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(.white.opacity(0.35))
+                        .foregroundStyle(Color(.tertiaryLabel))
                 }
                 .buttonStyle(.plain)
             }
         }
         .padding(.horizontal, 14)
         .frame(height: 48)
-        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                .stroke(Color(.separator), lineWidth: 1)
         )
     }
 
@@ -178,10 +163,10 @@ struct ForYouView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.title2.weight(.heavy))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(.label))
             Text(subtitle)
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.white.opacity(0.46))
+                .foregroundStyle(Color(.secondaryLabel))
         }
     }
 }
@@ -250,11 +235,11 @@ private struct RecommendedCommentCard: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(item.artist.name)
                         .font(.subheadline.weight(.bold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color(.label))
                         .lineLimit(1)
                     Text(item.song.title)
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.48))
+                        .foregroundStyle(Color(.secondaryLabel))
                         .lineLimit(1)
                 }
 
@@ -262,12 +247,12 @@ private struct RecommendedCommentCard: View {
 
                 Image(systemName: "chevron.right")
                     .font(.caption.weight(.heavy))
-                    .foregroundStyle(.white.opacity(0.28))
+                    .foregroundStyle(Color(.tertiaryLabel))
             }
 
             Text(item.howCard.comment)
                 .font(.body.weight(.semibold))
-                .foregroundStyle(.white.opacity(0.90))
+                .foregroundStyle(Color(.label))
                 .lineLimit(4)
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
@@ -280,20 +265,13 @@ private struct RecommendedCommentCard: View {
                     .font(.caption.weight(.heavy))
             }
             .font(.caption.weight(.bold))
-            .foregroundStyle(.white.opacity(0.54))
+            .foregroundStyle(Color(.secondaryLabel))
         }
         .padding(16)
-        .background(
-            LinearGradient(
-                colors: [Color.white.opacity(0.08), Color.white.opacity(0.04)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            ),
-            in: RoundedRectangle(cornerRadius: 16, style: .continuous)
-        )
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                .stroke(Color(.separator), lineWidth: 1)
         )
     }
 
@@ -315,27 +293,27 @@ private struct CommentSkeletonRow: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(Color.white.opacity(0.10))
+                    .fill(Color(.secondarySystemBackground))
                     .frame(width: 46, height: 46)
                 VStack(alignment: .leading, spacing: 7) {
                     RoundedRectangle(cornerRadius: 4, style: .continuous)
-                        .fill(Color.white.opacity(0.12))
+                        .fill(Color(.secondarySystemBackground))
                         .frame(width: [120, 156, 104, 138][index % 4], height: 12)
                     RoundedRectangle(cornerRadius: 4, style: .continuous)
-                        .fill(Color.white.opacity(0.07))
+                        .fill(Color(.secondarySystemBackground))
                         .frame(width: [92, 116, 130, 98][index % 4], height: 10)
                 }
                 Spacer()
             }
             RoundedRectangle(cornerRadius: 4, style: .continuous)
-                .fill(Color.white.opacity(0.09))
+                .fill(Color(.secondarySystemBackground))
                 .frame(height: 12)
             RoundedRectangle(cornerRadius: 4, style: .continuous)
-                .fill(Color.white.opacity(0.06))
+                .fill(Color(.secondarySystemBackground))
                 .frame(width: [220, 250, 190, 236][index % 4], height: 12)
         }
         .padding(16)
-        .background(Color.white.opacity(0.045), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .redacted(reason: .placeholder)
     }
 }
@@ -350,28 +328,28 @@ private struct CommentDashboardMessage: View {
         VStack(spacing: 12) {
             Image(systemName: "text.bubble")
                 .font(.system(size: 24, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.54))
+                .foregroundStyle(Color(.secondaryLabel))
             Text(title)
                 .font(.headline.weight(.bold))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(.label))
             Text(message)
                 .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.58))
+                .foregroundStyle(Color(.secondaryLabel))
                 .multilineTextAlignment(.center)
             if let actionTitle, let action {
                 Button(actionTitle, action: action)
                     .font(.subheadline.weight(.bold))
-                    .foregroundStyle(.black)
+                    .foregroundStyle(.white)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
-                    .background(.white, in: Capsule())
+                    .background(HowTuneDesign.accent, in: Capsule())
                     .buttonStyle(.plain)
             }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 34)
         .padding(.horizontal, 18)
-        .background(Color.white.opacity(0.045), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 

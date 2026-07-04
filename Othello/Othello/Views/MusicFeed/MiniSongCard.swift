@@ -24,14 +24,14 @@ struct MiniSongCard: View {
                 Text(song.title)
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.label))
                 Text(song.artistName)
                     .font(.caption)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
                 if context.hasHighlight {
                     Text("How \(formatTime(context.highlightStart ?? context.initialPlaybackTime)) - \(formatTime(context.highlightEnd ?? context.initialPlaybackTime))")
                         .font(.caption2.monospacedDigit())
-                        .foregroundStyle(Color(red: 1.0, green: 0.3, blue: 0.3))
+                        .foregroundStyle(HowTuneDesign.accent)
                 }
             }
             Spacer()
@@ -39,7 +39,7 @@ struct MiniSongCard: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
         .contentShape(RoundedRectangle(cornerRadius: 12))
     }
 

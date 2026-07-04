@@ -27,7 +27,6 @@ struct HomeView: View {
     @State private var didAutoPresentSearch = false
     @State private var outputVolume = AVAudioSession.sharedInstance().outputVolume
 
-    private let accent = Color(red: 1.0, green: 0.3, blue: 0.3)
     private let deepRed = Color(red: 0.85, green: 0.15, blue: 0.2)
     private let grooveBlue = Color(red: 0.18, green: 0.68, blue: 1.0)
     private let volumeTimer = Timer.publish(every: 0.8, on: .main, in: .common).autoconnect()
@@ -181,8 +180,8 @@ struct HomeView: View {
                 }
                 .padding(.horizontal, 18)
                 .frame(height: 58)
-                .background(Color.white.opacity(0.09), in: Capsule())
-                .overlay(Capsule().stroke(Color.white.opacity(0.14), lineWidth: 1))
+                .background(Color(.secondarySystemBackground), in: Capsule())
+                .overlay(Capsule().stroke(Color(.separator), lineWidth: 1))
             }
             .buttonStyle(.plain)
 
@@ -216,7 +215,7 @@ struct HomeView: View {
                     .font(.headline.weight(.bold))
                     .foregroundStyle(.white)
                     .frame(width: 42, height: 42)
-                    .background(Color.white.opacity(0.10), in: Circle())
+                    .background(Color(.secondarySystemBackground), in: Circle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("曲を選ぶ")
@@ -230,7 +229,7 @@ struct HomeView: View {
                     .font(.headline.weight(.bold))
                     .foregroundStyle(.white)
                     .frame(width: 42, height: 42)
-                    .background(Color.white.opacity(0.10), in: Circle())
+                    .background(Color(.secondarySystemBackground), in: Circle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("リアルタイム反応")
@@ -267,7 +266,7 @@ struct HomeView: View {
         ZStack {
             diskArtworkView(url: displayTrack?.artworkURL, size: size)
                 .clipShape(Circle())
-                .overlay(Circle().stroke(Color.white.opacity(0.10), lineWidth: 1))
+                .overlay(Circle().stroke(Color(.separator), lineWidth: 1))
                 .rotationEffect(.degrees(displayIsPlaying ? artworkRotation : 0))
 
             Circle()
@@ -314,7 +313,7 @@ struct HomeView: View {
                         .foregroundStyle(.white)
                         .frame(width: 50, height: 50)
                         .background(Color.white.opacity(0.18), in: Circle())
-                        .overlay(Circle().stroke(Color.white.opacity(0.12), lineWidth: 1))
+                        .overlay(Circle().stroke(Color(.separator), lineWidth: 1))
                         .offset(x: displayIsPlaying ? 0 : 3)
                 }
                 .buttonStyle(.plain)
@@ -346,11 +345,11 @@ struct HomeView: View {
 
                 ZStack(alignment: .leading) {
                     Capsule()
-                        .fill(Color.white.opacity(0.12))
+                        .fill(Color(.secondarySystemBackground))
                     Capsule()
                         .fill(
                             LinearGradient(
-                                colors: [accent, Color.orange.opacity(0.92), grooveBlue.opacity(0.9)],
+                                colors: [HowTuneDesign.accent, Color.orange.opacity(0.92), grooveBlue.opacity(0.9)],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
@@ -369,7 +368,7 @@ struct HomeView: View {
                     Circle()
                         .fill(Color.white)
                         .frame(width: 9, height: 9)
-                        .shadow(color: accent.opacity(0.8), radius: 8)
+                        .shadow(color: HowTuneDesign.accent.opacity(0.8), radius: 8)
                         .offset(x: max(0, width * progress - 4.5))
                 }
             }
@@ -448,7 +447,7 @@ struct HomeView: View {
                 if showsTime {
                     Text(formatTime(line.startTime))
                         .font(.caption.monospacedDigit().weight(.semibold))
-                        .foregroundStyle(isHighlighted ? accent : .white.opacity(0.38))
+                        .foregroundStyle(isHighlighted ? HowTuneDesign.accent : .white.opacity(0.38))
                 }
 
                 Text(line.text.isEmpty ? "♪" : line.text)
@@ -479,7 +478,7 @@ struct HomeView: View {
         HStack(spacing: 8) {
             Label("\(howCount(for: index)) How", systemImage: "bubble.left.fill")
                 .font(.caption2.weight(.bold))
-                .foregroundStyle(isHighlighted ? accent : .white.opacity(0.46))
+                .foregroundStyle(isHighlighted ? HowTuneDesign.accent : .white.opacity(0.46))
 
             Label("コメント", systemImage: "text.bubble.fill")
                 .font(.caption2.weight(.bold))
@@ -536,15 +535,15 @@ struct HomeView: View {
     private func skeletonTrackRow(index: Int) -> some View {
         HStack(spacing: 12) {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(Color.white.opacity(0.08))
+                .fill(Color(.secondarySystemBackground))
                 .frame(width: 54, height: 54)
 
             VStack(alignment: .leading, spacing: 8) {
                 RoundedRectangle(cornerRadius: 4, style: .continuous)
-                    .fill(Color.white.opacity(0.12))
+                    .fill(Color(.secondarySystemBackground))
                     .frame(width: trackSkeletonTitleWidth(index: index), height: 12)
                 RoundedRectangle(cornerRadius: 4, style: .continuous)
-                    .fill(Color.white.opacity(0.07))
+                    .fill(Color(.secondarySystemBackground))
                     .frame(width: trackSkeletonArtistWidth(index: index), height: 10)
             }
 
@@ -558,9 +557,9 @@ struct HomeView: View {
             VStack(spacing: 0) {
                 HStack {
                     Image(systemName: "magnifyingglass")
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(Color(.secondaryLabel))
                     TextField("曲名・アーティスト名で検索", text: $playback.searchQuery)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color(.label))
                         .submitLabel(.search)
                         .onSubmit { Task { await playback.search() } }
                         .disabled(!playback.canUseAppleMusicCatalog)
@@ -570,12 +569,12 @@ struct HomeView: View {
                             playback.searchResults = []
                         } label: {
                             Image(systemName: "xmark.circle.fill")
-                                .foregroundStyle(.gray)
+                                .foregroundStyle(Color(.secondaryLabel))
                         }
                     }
                 }
                 .padding(12)
-                .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
+                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
 
@@ -611,17 +610,17 @@ struct HomeView: View {
                                 VStack(alignment: .leading, spacing: 3) {
                                     Text(track.title)
                                         .font(.body.weight(.semibold))
-                                        .foregroundStyle(.white)
+                                        .foregroundStyle(Color(.label))
                                         .lineLimit(1)
                                     Text(track.artistName)
                                         .font(.caption)
-                                        .foregroundStyle(.gray)
+                                        .foregroundStyle(Color(.secondaryLabel))
                                         .lineLimit(1)
                                 }
                                 Spacer()
                                 Image(systemName: "play.circle.fill")
                                     .font(.title3)
-                                    .foregroundStyle(accent)
+                                    .foregroundStyle(HowTuneDesign.accent)
                             }
                             .padding(.vertical, 4)
                         }
@@ -633,14 +632,14 @@ struct HomeView: View {
 
                 Spacer()
             }
-            .background(Color.black.ignoresSafeArea())
+            .background(Color(.systemBackground).ignoresSafeArea())
             .navigationTitle("曲を選ぶ")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("閉じる") { showSearchSheet = false }
-                        .foregroundStyle(accent)
+                        .foregroundStyle(HowTuneDesign.accent)
                 }
             }
         }
@@ -651,13 +650,13 @@ struct HomeView: View {
         VStack(spacing: 12) {
             Image(systemName: systemImage)
                 .font(.system(size: 36, weight: .semibold))
-                .foregroundStyle(.gray)
+                .foregroundStyle(Color(.secondaryLabel))
             Text(title)
                 .font(.headline)
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(.label))
             Text(description)
                 .font(.subheadline)
-                .foregroundStyle(.gray)
+                .foregroundStyle(Color(.secondaryLabel))
                 .multilineTextAlignment(.center)
         }
         .padding(.horizontal, 24)

@@ -43,25 +43,25 @@ struct ClipCreationInlineView: View {
             HStack {
                 Text("コメント")
                     .font(.caption)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
                 Spacer()
                 Text("\(viewModel.commentText.count)/140")
                     .font(.caption.monospacedDigit())
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
             }
 
             ZStack(alignment: .topLeading) {
                 if viewModel.commentText.isEmpty {
                     Text("この曲のここが好き")
                         .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.32))
+                        .foregroundStyle(Color(.tertiaryLabel))
                         .padding(.horizontal, 14)
                         .padding(.vertical, 13)
                 }
 
                 TextEditor(text: $viewModel.commentText)
                     .font(.subheadline)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.label))
                     .scrollContentBackground(.hidden)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 8)
@@ -72,10 +72,10 @@ struct ClipCreationInlineView: View {
                         }
                     }
             }
-            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
+            .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
-                    .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                    .stroke(Color(.separator), lineWidth: 1)
             )
 
             if viewModel.postedCardID != nil {

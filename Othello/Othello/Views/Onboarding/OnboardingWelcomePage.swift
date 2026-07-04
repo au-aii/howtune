@@ -25,10 +25,10 @@ struct OnboardingWelcomePage: View {
                     VStack(spacing: 6) {
                         Text("HowTune")
                             .font(.system(size: 38, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color(.label))
                         Text("How でつながる音楽体験")
                             .font(.subheadline)
-                            .foregroundStyle(.gray)
+                            .foregroundStyle(Color(.secondaryLabel))
                     }
                 }
 
@@ -79,10 +79,10 @@ struct OnboardingWelcomePage: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.subheadline.bold())
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.label))
                 Text(description)
                     .font(.caption)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
             }
             Spacer()
         }

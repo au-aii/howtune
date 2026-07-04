@@ -28,7 +28,7 @@ struct LoginView: View {
                     }
                     Text("HowTune")
                         .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color(.label))
                 }
 
                 Spacer()
@@ -40,7 +40,7 @@ struct LoginView: View {
                             .keyboardType(.emailAddress)
                             .autocorrectionDisabled()
                             .textInputAutocapitalization(.never)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color(.label))
                             .focused($focus, equals: .email)
                             .submitLabel(.next)
                             .onSubmit { focus = .password }
@@ -48,7 +48,7 @@ struct LoginView: View {
 
                     fieldRow(icon: "lock") {
                         SecureField("パスワード", text: $password)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color(.label))
                             .textContentType(.password)
                             .focused($focus, equals: .password)
                             .submitLabel(.go)
@@ -77,7 +77,7 @@ struct LoginView: View {
                     showSignUp = true
                 } label: {
                     Text("アカウントをお持ちでない方は ")
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(Color(.secondaryLabel))
                     + Text("新規登録")
                         .foregroundStyle(HowTuneDesign.accent)
                 }
@@ -93,7 +93,7 @@ struct LoginView: View {
     private func fieldRow<Content: View>(icon: String, @ViewBuilder content: () -> Content) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .foregroundStyle(.gray)
+                .foregroundStyle(Color(.secondaryLabel))
                 .frame(width: 20)
             content()
         }
@@ -101,7 +101,7 @@ struct LoginView: View {
         .background(HowTuneDesign.surface, in: RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                .stroke(Color(.systemGray4), lineWidth: 1)
         )
     }
 }

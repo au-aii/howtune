@@ -12,10 +12,10 @@ struct ReactionEventRow: View {
                     // 時刻バッジ
                     Text(formatTime(event.startTime))
                         .font(.caption.monospacedDigit().bold())
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color(.label))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.white.opacity(0.1), in: RoundedRectangle(cornerRadius: 6))
+                        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 6))
                         .frame(width: 52)
 
                     VStack(alignment: .leading, spacing: 6) {
@@ -43,11 +43,11 @@ struct ReactionEventRow: View {
                         if let lyric = event.lyricLine {
                             Text(lyric)
                                 .font(.subheadline)
-                                .foregroundStyle(.white)
+                                .foregroundStyle(Color(.label))
                             if let translation = event.lyricTranslation {
                                 Text(translation)
                                     .font(.caption)
-                                    .foregroundStyle(.gray)
+                                    .foregroundStyle(Color(.secondaryLabel))
                             }
                         } else {
                             // FR-LYRIC-02: 歌詞なしフォールバック
@@ -62,7 +62,7 @@ struct ReactionEventRow: View {
 
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         .font(.caption)
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(Color(.secondaryLabel))
                         .padding(.top, 4)
                 }
                 .padding(.horizontal, 20)
