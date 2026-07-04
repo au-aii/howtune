@@ -51,7 +51,7 @@
   - 検証: ファイルが壊れず追記されている（目視）
   - ブランチ: `feat/web-dashboard-phase1`
 
-- [ ] **T1-2: ダーク/ライト OS 追従を ADR 化**
+- [x] **T1-2: ダーク/ライト OS 追従を ADR 化**
   - 対象: 新規 `docs/adr/0008-adaptive-color-scheme.md`
   - 元ネタ: steering `.steering/20260704-adaptive-color-scheme/`（requirements/design/tasklist を読んで決定と理由を要約）
   - 内容: 決定＝セマンティックカラー＋`themePreference`(system/light/dark) で OS 追従。ブランド赤/グラデ/HowTag 色/赤地白文字は維持。背景・理由・代替案・結果。
@@ -111,3 +111,4 @@
 
 - 2026-07-05 セットアップ: キュー作成。
 - 2026-07-05 T1-1 完了: AI_USAGE_LOG に本日分 #017–#020 追記。
+- 2026-07-05 T1-2 完了: ADR-0008 ダーク/ライト追従を作成、roadmap 更新。
