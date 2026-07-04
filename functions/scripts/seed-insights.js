@@ -96,6 +96,42 @@ async function main() {
     if (shouldWrite) await ref.set(data, { merge: true });
   }
 
+  // 自分のアカウント(SEED_MY_EMAIL)も反応者として追加＝Web ダッシュボードに出すため
+  const myEmail = process.env.SEED_MY_EMAIL;
+  if (shouldWrite && myEmail) {
+    try {
+      const me = await admin.auth().getUserByEmail(myEmail);
+      await db
+        .collection("how-cards")
+        .doc("demo-insights-card-me")
+        .set(
+          {
+            comment: "自分もここで反応した",
+            song_start: 45,
+            song_end: 51,
+            song_id: SONG_ID,
+            itunes_id: SONG_ID,
+            song_slug: SONG_ID,
+            song_title: "HowTune Demo",
+            artist_id: "howtune",
+            artist_name: "HowTune",
+            user_id: me.uid,
+            user_name: me.displayName ?? "あなた",
+            likes: 0,
+            tags: [],
+            created_at: now,
+            updated_at: now,
+          },
+          { merge: true },
+        );
+      console.log(
+        `[seed-insights] added your card (email=${myEmail} uid=${me.uid})`,
+      );
+    } catch (e) {
+      console.log(`[seed-insights] SEED_MY_EMAIL lookup failed: ${e.message}`);
+    }
+  }
+
   // 集計トリガーが未デプロイでも動くよう、seed 後に集計も実行する
   if (shouldWrite) {
     const { recomputeSongInsights } = require("../repositories/insights");
