@@ -4,16 +4,18 @@
  * 密度ヒートマップに山ができるよう時間帯をクラスタさせる。
  * コメントに keyword を仕込み、推定タグ（chill/groove/neutral）が分散するようにする。
  *
- * 使い方（ADC 認証・howtune-74252 に書く）:
+ * 使い方（ADC 認証・howtune-74252 に書く。Node は Volta で 22 に固定済み）:
  *   cd functions
- *   GOOGLE_CLOUD_PROJECT=howtune-74252 node scripts/seed-insights.js --write
+ *   GOOGLE_CLOUD_PROJECT=howtune-74252 SEED_MY_EMAIL=<自分のログインemail> node scripts/seed-insights.js --write
  *   (--write 無しは dry-run)
+ *
+ * ⚠️ Homebrew の node(26 等)で直接叩くと firebase-admin の node-fetch が gzip で壊れ、
+ *    Firestore/Auth への書き込みが全滅する。必ず pin された node@22 で実行すること
+ *    （volta setup 済みなら cd するだけで 22 になる。node --version で確認）。
  *
  * how-card 書き込みで onHowCardWritten トリガーが発火し song_insights/{SONG_ID} が生成される。
  */
 const admin = require("firebase-admin");
-
-process.env.FIRESTORE_PREFER_REST = "1";
 
 const SONG_ID = "howtune-demo-song";
 
@@ -96,39 +98,63 @@ async function main() {
     if (shouldWrite) await ref.set(data, { merge: true });
   }
 
-  // 自分のアカウント(SEED_MY_EMAIL)も反応者として追加＝Web ダッシュボードに出すため
+  // 自分のアカウント(SEED_MY_EMAIL)も反応者として追加＝Web ダッシュボードに出すため。
+  // Node 26 では Auth admin(REST) が gzip バグで落ちるため、まず Firestore(gRPC) の
+  // users から uid を引く。見つからなければ Auth admin にフォールバック。
   const myEmail = process.env.SEED_MY_EMAIL;
   if (shouldWrite && myEmail) {
+    let myUid = null;
+    let myName = "あなた";
     try {
-      const me = await admin.auth().getUserByEmail(myEmail);
-      await db
-        .collection("how-cards")
-        .doc("demo-insights-card-me")
-        .set(
-          {
-            comment: "自分もここで反応した",
-            song_start: 45,
-            song_end: 51,
-            song_id: SONG_ID,
-            itunes_id: SONG_ID,
-            song_slug: SONG_ID,
-            song_title: "HowTune Demo",
-            artist_id: "howtune",
-            artist_name: "HowTune",
-            user_id: me.uid,
-            user_name: me.displayName ?? "あなた",
-            likes: 0,
-            tags: [],
-            created_at: now,
-            updated_at: now,
-          },
-          { merge: true },
-        );
-      console.log(
-        `[seed-insights] added your card (email=${myEmail} uid=${me.uid})`,
-      );
+      const q = await db
+        .collection("users")
+        .where("email", "==", myEmail)
+        .limit(1)
+        .get();
+      if (!q.empty) {
+        myUid = q.docs[0].id;
+        myName = q.docs[0].data().display_name ?? myName;
+      }
     } catch (e) {
-      console.log(`[seed-insights] SEED_MY_EMAIL lookup failed: ${e.message}`);
+      console.log(`[seed-insights] users lookup failed: ${e.message}`);
+    }
+    if (!myUid) {
+      try {
+        const me = await admin.auth().getUserByEmail(myEmail);
+        myUid = me.uid;
+        myName = me.displayName ?? myName;
+      } catch (e) {
+        console.log(`[seed-insights] auth lookup failed: ${e.message}`);
+      }
+    }
+    if (myUid) {
+      await db.collection("how-cards").doc("demo-insights-card-me").set(
+        {
+          comment: "自分もここで反応した",
+          song_start: 45,
+          song_end: 51,
+          song_id: SONG_ID,
+          itunes_id: SONG_ID,
+          song_slug: SONG_ID,
+          song_title: "HowTune Demo",
+          artist_id: "howtune",
+          artist_name: "HowTune",
+          user_id: myUid,
+          user_name: myName,
+          likes: 0,
+          tags: [],
+          created_at: now,
+          updated_at: now,
+        },
+        { merge: true },
+      );
+      console.log(
+        `[seed-insights] added your card (email=${myEmail} uid=${myUid})`,
+      );
+    } else {
+      console.log(
+        `[seed-insights] could not resolve uid for ${myEmail}; skipped your card`,
+      );
     }
   }
 
