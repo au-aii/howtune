@@ -16,11 +16,13 @@
 
 ## ⬜ 次にやること（優先度順）
 
-### Web ダッシュボード
+### Web ダッシュボード（ブランチ `feat/web-dashboard-phase1`）
 
-- [ ] Phase 1 を personal 内で PR → マージ
-- [ ] **Firebase Hosting にデプロイ**（実 URL で見られるように）
-- [ ] **Phase 2**: Cloud Functions で `song_insights` 集計（匿名化・k-匿名性）← B2B の土台
+- [x] Phase 1（本人の How カード一覧・Firestore 直読み）
+- [x] **Firebase Hosting デプロイ** → https://howtune-74252.web.app
+- [x] **Phase 2**: `song_insights` 集計（密度＝How カード区間 / **推定タグ** / k=5）＋Web 表示 ※集計トリガーは functions デプロイで有効化
+- [ ] personal 内で PR → マージ（Phase 1+2）
+- [ ] **生 ReactionEvent 保存で「本物の反応密度＋タグ」に（moat）** → [issue #112](https://github.com/engineer-guild-hackathon-2026-05/team-10/issues/112)
 - [ ] **Phase 3**: アーティスト認証・曲所有権・反応ヒートマップ（B2B インサイト）
 
 ### iOS 小物
