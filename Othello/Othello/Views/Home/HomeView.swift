@@ -62,7 +62,6 @@ struct HomeView: View {
                 .safeAreaPadding(.bottom, 96)
                 .padding(.bottom, 36)
             }
-            .preferredColorScheme(.dark)
             .navigationBarHidden(true)
             .navigationDestination(isPresented: $navigateToReaction) {
                 ReactionDisplayView(
@@ -646,7 +645,6 @@ struct HomeView: View {
             }
         }
         .presentationDetents([.medium, .large])
-        .preferredColorScheme(.dark)
     }
 
     private func searchEmptyState(title: String, systemImage: String, description: String) -> some View {

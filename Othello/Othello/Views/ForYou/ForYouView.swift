@@ -4,6 +4,7 @@ struct ForYouView: View {
     @Binding var nowPlayingContext: NowPlayingContext?
     @ObservedObject var playback: PlaybackViewModel
     @StateObject private var dashboard = HomeDashboardViewModel()
+    @AppStorage("prefersDarkTheme") var prefersDarkTheme = true
     @State private var searchQuery = ""
     @State private var selectedArtist: Artist?
     @State private var selectedComment: HomeDashboardComment?
@@ -28,6 +29,20 @@ struct ForYouView: View {
                     await dashboard.load(force: true)
                 }
             }
+            .overlay(alignment: .topTrailing) {
+                Button {
+                    withAnimation { prefersDarkTheme.toggle() }
+                } label: {
+                    Image(systemName: prefersDarkTheme ? "moon.fill" : "sun.max.fill")
+                        .font(.subheadline)
+                        .foregroundStyle(.white)
+                        .frame(width: 36, height: 36)
+                        .background(.white.opacity(0.12), in: Circle())
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 8)
+                .padding(.trailing, 16)
+            }
             .navigationBarHidden(true)
             .navigationDestination(item: $selectedArtist) { artist in
                 MusicFeedView(
@@ -41,7 +56,6 @@ struct ForYouView: View {
                     playback: playback
                 )
             }
-            .preferredColorScheme(.dark)
         }
         .task(id: dashboardReloadNonce) {
             await dashboard.load(force: true)

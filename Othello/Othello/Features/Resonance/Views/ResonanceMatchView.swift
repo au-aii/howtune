@@ -42,7 +42,6 @@ struct ResonanceMatchView: View {
                     }
                 }
             }
-            .preferredColorScheme(.dark)
             .navigationTitle("共鳴")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

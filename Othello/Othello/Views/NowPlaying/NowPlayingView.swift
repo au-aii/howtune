@@ -37,7 +37,6 @@ struct NowPlayingView: View {
                 nowPlayingFooter
             }
         }
-        .preferredColorScheme(.dark)
         .task(id: lyricsTaskID) {
             await lyricsViewModel.loadLyrics(for: lyricsQuery)
         }

@@ -26,7 +26,6 @@ struct ReactionTimelineView: View {
                     }
                 }
             }
-            .preferredColorScheme(.dark)
             .navigationTitle("振り返り")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarColorScheme(.dark, for: .navigationBar)

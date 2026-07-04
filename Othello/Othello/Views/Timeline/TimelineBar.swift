@@ -93,5 +93,4 @@ struct TimelineBar: View {
         )
         .padding(.vertical, 40)
     }
-    .preferredColorScheme(.dark)
 }

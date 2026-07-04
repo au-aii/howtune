@@ -25,7 +25,6 @@ struct RealtimeReactionDisplayView: View {
                     .padding(.bottom, 40)
                 }
             }
-            .preferredColorScheme(.dark)
             .navigationTitle("リアルタイム反応")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarColorScheme(.dark, for: .navigationBar)

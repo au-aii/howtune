@@ -42,7 +42,6 @@ struct HowCardRepliesView: View {
                 await viewModel.load()
             }
         }
-        .preferredColorScheme(.dark)
     }
 
     private var originalPost: some View {

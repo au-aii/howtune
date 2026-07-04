@@ -6,6 +6,9 @@ struct SignUpView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var passwordConfirm = ""
+    @FocusState private var focus: SignUpField?
+
+    private enum SignUpField { case email, password, confirmPassword }
 
     private var passwordMismatch: Bool {
         !passwordConfirm.isEmpty && password != passwordConfirm
@@ -32,24 +35,35 @@ struct SignUpView: View {
                     .padding(.top, 8)
 
                     VStack(spacing: 16) {
-                        signUpTextField(
-                            placeholder: "メールアドレス",
-                            icon: "envelope",
-                            text: $email,
-                            isSecure: false
-                        )
-                        signUpTextField(
-                            placeholder: "パスワード（6文字以上）",
-                            icon: "lock",
-                            text: $password,
-                            isSecure: true
-                        )
-                        signUpTextField(
-                            placeholder: "パスワード確認",
-                            icon: "lock.fill",
-                            text: $passwordConfirm,
-                            isSecure: true
-                        )
+                        fieldRow(icon: "envelope") {
+                            TextField("メールアドレス", text: $email)
+                                .textContentType(.emailAddress)
+                                .keyboardType(.emailAddress)
+                                .autocorrectionDisabled()
+                                .textInputAutocapitalization(.never)
+                                .foregroundStyle(.white)
+                                .focused($focus, equals: .email)
+                                .submitLabel(.next)
+                                .onSubmit { focus = .password }
+                        }
+
+                        fieldRow(icon: "lock") {
+                            SecureField("パスワード（6文字以上）", text: $password)
+                                .foregroundStyle(.white)
+                                .textContentType(.newPassword)
+                                .focused($focus, equals: .password)
+                                .submitLabel(.next)
+                                .onSubmit { focus = .confirmPassword }
+                        }
+
+                        fieldRow(icon: "lock.fill") {
+                            SecureField("パスワード確認", text: $passwordConfirm)
+                                .foregroundStyle(.white)
+                                .textContentType(.newPassword)
+                                .focused($focus, equals: .confirmPassword)
+                                .submitLabel(.done)
+                                .onSubmit { if canSubmit { Task { await authVM.signUp(email: email, password: password) } } }
+                        }
 
                         if passwordMismatch {
                             Text("パスワードが一致しません")
@@ -83,7 +97,6 @@ struct SignUpView: View {
                     Spacer()
                 }
             }
-            .preferredColorScheme(.dark)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -97,27 +110,12 @@ struct SignUpView: View {
         }
     }
 
-    private func signUpTextField(
-        placeholder: String,
-        icon: String,
-        text: Binding<String>,
-        isSecure: Bool
-    ) -> some View {
+    private func fieldRow<Content: View>(icon: String, @ViewBuilder content: () -> Content) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .foregroundStyle(.gray)
                 .frame(width: 20)
-            if isSecure {
-                SecureField(placeholder, text: text)
-                    .foregroundStyle(.white)
-            } else {
-                TextField(placeholder, text: text)
-                    .textContentType(.emailAddress)
-                    .keyboardType(.emailAddress)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                    .foregroundStyle(.white)
-            }
+            content()
         }
         .padding(16)
         .background(HowTuneDesign.surface, in: RoundedRectangle(cornerRadius: 12))

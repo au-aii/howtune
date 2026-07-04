@@ -40,7 +40,6 @@ struct ReactionDisplayView: View {
                 postedOverlay
             }
         }
-        .preferredColorScheme(.dark)
         .navigationTitle("Howカード")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {

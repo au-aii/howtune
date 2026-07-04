@@ -38,7 +38,6 @@ struct ContentView: View {
 
             bottomOverlay
         }
-        .preferredColorScheme(.dark)
         .task {
             await playback.onAppear()
         }

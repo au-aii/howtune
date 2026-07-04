@@ -84,7 +84,6 @@ struct OnboardingMusicPage: View {
                 .padding(.bottom, 48)
             }
         }
-        .preferredColorScheme(.dark)
     }
 
     private var nextButton: some View {

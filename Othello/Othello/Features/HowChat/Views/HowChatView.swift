@@ -23,7 +23,6 @@ struct HowChatView: View {
                     inputArea
                 }
             }
-            .preferredColorScheme(.dark)
             .navigationTitle("この瞬間について")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarColorScheme(.dark, for: .navigationBar)
@@ -38,7 +37,6 @@ struct HowChatView: View {
             }
         }
         .presentationDetents([.large])
-        .preferredColorScheme(.dark)
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .onAppear { vm.start() }
         .onTapGesture { isInputFocused = false }

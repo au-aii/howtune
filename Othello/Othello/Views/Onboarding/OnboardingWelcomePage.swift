@@ -68,7 +68,6 @@ struct OnboardingWelcomePage: View {
                 .padding(.bottom, 48)
             }
         }
-        .preferredColorScheme(.dark)
     }
 
     private func featureRow(icon: String, title: String, description: String) -> some View {

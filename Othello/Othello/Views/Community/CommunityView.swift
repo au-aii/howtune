@@ -22,7 +22,6 @@ struct CommunityView: View {
                     .padding(.bottom, 40)
                 }
             }
-            .preferredColorScheme(.dark)
             .navigationTitle("コミュニティ")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarColorScheme(.dark, for: .navigationBar)

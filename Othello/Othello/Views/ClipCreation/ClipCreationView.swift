@@ -50,7 +50,6 @@ struct ClipCreationView: View {
             } message: {
                 Text(viewModel.postErrorMessage ?? "")
             }
-            .preferredColorScheme(.dark)
         }
     }
 

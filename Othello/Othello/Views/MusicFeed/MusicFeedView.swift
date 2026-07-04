@@ -49,7 +49,6 @@ struct MusicFeedView: View {
         .onReceive(NotificationCenter.default.publisher(for: .howCardDidChange)) { _ in
             reloadNonce &+= 1
         }
-        .preferredColorScheme(.dark)
     }
 
     private var loadPostsTaskID: String {

@@ -122,5 +122,4 @@ struct ReactionEventRow: View {
             )
         }
     }
-    .preferredColorScheme(.dark)
 }

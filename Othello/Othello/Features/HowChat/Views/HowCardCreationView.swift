@@ -44,7 +44,6 @@ struct HowCardCreationView: View {
                 postedOverlay
             }
         }
-        .preferredColorScheme(.dark)
         .navigationTitle("Howカードを作る")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.dark, for: .navigationBar)

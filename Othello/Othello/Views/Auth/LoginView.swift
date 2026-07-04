@@ -5,6 +5,9 @@ struct LoginView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var showSignUp = false
+    @FocusState private var focus: LoginField?
+
+    private enum LoginField { case email, password }
 
     var body: some View {
         ZStack {
@@ -31,18 +34,26 @@ struct LoginView: View {
                 Spacer()
 
                 VStack(spacing: 16) {
-                    authTextField(
-                        placeholder: "メールアドレス",
-                        icon: "envelope",
-                        text: $email,
-                        isSecure: false
-                    )
-                    authTextField(
-                        placeholder: "パスワード",
-                        icon: "lock",
-                        text: $password,
-                        isSecure: true
-                    )
+                    fieldRow(icon: "envelope") {
+                        TextField("メールアドレス", text: $email)
+                            .textContentType(.emailAddress)
+                            .keyboardType(.emailAddress)
+                            .autocorrectionDisabled()
+                            .textInputAutocapitalization(.never)
+                            .foregroundStyle(.white)
+                            .focused($focus, equals: .email)
+                            .submitLabel(.next)
+                            .onSubmit { focus = .password }
+                    }
+
+                    fieldRow(icon: "lock") {
+                        SecureField("パスワード", text: $password)
+                            .foregroundStyle(.white)
+                            .textContentType(.password)
+                            .focused($focus, equals: .password)
+                            .submitLabel(.go)
+                            .onSubmit { Task { await authVM.signIn(email: email, password: password) } }
+                    }
 
                     if let error = authVM.errorMessage {
                         Text(error)
@@ -74,33 +85,17 @@ struct LoginView: View {
                 .padding(.bottom, 48)
             }
         }
-        .preferredColorScheme(.dark)
         .sheet(isPresented: $showSignUp) {
             SignUpView(authVM: authVM)
         }
     }
 
-    private func authTextField(
-        placeholder: String,
-        icon: String,
-        text: Binding<String>,
-        isSecure: Bool
-    ) -> some View {
+    private func fieldRow<Content: View>(icon: String, @ViewBuilder content: () -> Content) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .foregroundStyle(.gray)
                 .frame(width: 20)
-            if isSecure {
-                SecureField(placeholder, text: text)
-                    .foregroundStyle(.white)
-            } else {
-                TextField(placeholder, text: text)
-                    .textContentType(.emailAddress)
-                    .keyboardType(.emailAddress)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                    .foregroundStyle(.white)
-            }
+            content()
         }
         .padding(16)
         .background(HowTuneDesign.surface, in: RoundedRectangle(cornerRadius: 12))
