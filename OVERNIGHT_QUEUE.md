@@ -112,6 +112,7 @@
 - **moat 実装（P-a）の未決3点**（T3-1）: 保存粒度 / 同意 opt-in・out / B2B 二次利用範囲。`.steering/20260705-reaction-event-persistence/requirements.md` 参照。確定後に実装着手。
 - **Phase3-B（アーティスト層）の未決3点**（T3-2）: 認証方式 / 所有権証明 / artist_id キー。`.steering/20260705-phase3-artist-insights/requirements.md` 参照。確定後に実装着手。
 - **実機（iPhone+AirPods）確認**: 自動化不可。ユーザー手動。
+- **集計トリガーの再デプロイ（任意・堅牢性）**: insights.js に OOM 防止のバケット上限を追加済み（コミット済み・未デプロイ）。本番の LIVE トリガーに反映するには `cd functions && PATH="/opt/homebrew/opt/node@22/bin:$PATH" firebase deploy --only functions:onHowCardWritten` を再実行。実害は「異常な song_end を持つカードが来た時のみ」なので緊急ではない。併せて `functions/routes/how-cards.js` の `normalizeRangePoint` に song_end 上限を足すと defense-in-depth（任意）。
 
 ## 進捗ログ（loop が1行ずつ追記）
 
@@ -125,3 +126,4 @@
 - 2026-07-05 T3-1 完了: moat 永続化の設計 steering 作成（reaction_sessions スキーマ・段階案）。実データ接地済み。未決3点あり。
 - 2026-07-05 T3-2 完了: Phase3 設計 steering＋P3-A スライス実装（Dashboard に任意曲インサイト閲覧、build green）。P3-B は未決待ち、deploy はユーザー。
 - 2026-07-05 全 Tier 消化。残タスク無し → ScheduleWakeup は再設定しない（ループ終了）。
+- 2026-07-05 コードレビュー（自己）: プライバシー ✅（song_insights に user_id 無し）・k=5 ✅。堅牢性1件修正: insights.js の bucketCount に上限(MAX_BUCKETS=4320)を追加＝異常 song_end による OOM 防止（song_end は API 側で上限未検証のため防御的に）。

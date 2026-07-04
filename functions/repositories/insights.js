@@ -7,6 +7,9 @@ const { FieldValue } = admin.firestore;
 const MIN_REACTORS = 5;
 // 密度ヒートマップの時間バケット（秒）
 const BUCKET_SEC = 5;
+// バケット数の上限（≈6時間相当）。song_end は API で上限バリデーションされていないため、
+// 異常値による Array.from({length: 巨大}) の OOM を防ぐ防御的キャップ。
+const MAX_BUCKETS = 4320;
 
 // コメント推測タグのフォールバック（iOS CommunityViewModel.tag(for:) の JS 移植）
 const CHILL_KEYWORDS = ["雨", "沁み", "泣", "余韻", "落ち着く", "孤独"];
@@ -69,7 +72,10 @@ async function recomputeSongInsights(songId) {
 
   // 密度: 各バケットで区間が重なる distinct user_id を数える
   const maxEnd = cards.reduce((m, c) => Math.max(m, c.song_end), 0);
-  const bucketCount = Math.max(1, Math.ceil(maxEnd / BUCKET_SEC));
+  const bucketCount = Math.min(
+    MAX_BUCKETS,
+    Math.max(1, Math.ceil(maxEnd / BUCKET_SEC)),
+  );
   const bucketReactors = Array.from({ length: bucketCount }, () => new Set());
   for (const c of cards) {
     const start = Math.max(0, c.song_start);
