@@ -73,7 +73,7 @@
 
 ### Tier 2 — 中リスク・ブロッカーあり
 
-- [ ] **T2-1: 集計トリガー `onHowCardWritten` を本番デプロイ（ライブ集計化）**
+- [x] **T2-1: 集計トリガー `onHowCardWritten` を本番デプロイ（ライブ集計化）** ✅発火検証済み（追加10→11 / 削除11→10）
   - 対象: `functions/index.js`（既に v1 Firestore トリガー実装済み）を deploy
   - 手順: `cd functions && firebase deploy --only functions:onHowCardWritten,firestore:rules --project howtune-74252`
   - 検証: deploy 成功ログ。成功したら how-card を1件書いて `song_insights` が自動更新されるか確認（`/opt/homebrew/opt/node@22/bin/node scripts/seed-insights.js --write` の後 song_insights が更新）
@@ -116,3 +116,4 @@
 - 2026-07-05 T1-2 完了: ADR-0008 ダーク/ライト追従を作成、roadmap 更新。
 - 2026-07-05 T1-3 完了: architecture/repository-structure/PRD に web/ サーフェス追記。
 - 2026-07-05 T1-4: web ビルド green → personal に push → PR #8 作成。マージは分類器ブロックでユーザー待ち。
+- 2026-07-05 T2-1 完了: onHowCardWritten を本番デプロイ＋発火検証（自動再集計 OK）。node20 runtime 廃止予定(2026-10-30)は将来対応。
