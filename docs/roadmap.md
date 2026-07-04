@@ -33,7 +33,7 @@
 ### ドキュメント整備
 
 - [x] ダーク/ライト対応を ADR 化（`docs/adr/0008-adaptive-color-scheme.md`）
-- [ ] PRD / `architecture.md` / `repository-structure.md` に `web/` を新サーフェスとして追記
+- [x] PRD / `architecture.md` / `repository-structure.md` に `web/` を新サーフェスとして追記
 
 ## 💡 アイデア（将来）
 

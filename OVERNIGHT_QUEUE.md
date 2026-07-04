@@ -58,7 +58,7 @@
   - 検証: `docs/roadmap.md` の「ダーク/ライト対応を ADR 化」を `[x]` に更新
   - ブランチ: `feat/web-dashboard-phase1`
 
-- [ ] **T1-3: `web/` を新サーフェスとして永続ドキュメントに追記**
+- [x] **T1-3: `web/` を新サーフェスとして永続ドキュメントに追記**
   - 対象: `docs/architecture.md` / `docs/repository-structure.md` / `docs/product-requirements.md`（該当箇所に web ダッシュボードを追記。Next.js 静的エクスポート→Firebase Hosting、Firestore 直読み＋song_insights、read-only、ADR-0007 参照）
   - 検証: 各ファイル整合（目視）＋ `docs/roadmap.md` の該当項目 `[x]`
   - ブランチ: `feat/web-dashboard-phase1`
@@ -112,3 +112,4 @@
 - 2026-07-05 セットアップ: キュー作成。
 - 2026-07-05 T1-1 完了: AI_USAGE_LOG に本日分 #017–#020 追記。
 - 2026-07-05 T1-2 完了: ADR-0008 ダーク/ライト追従を作成、roadmap 更新。
+- 2026-07-05 T1-3 完了: architecture/repository-structure/PRD に web/ サーフェス追記。
