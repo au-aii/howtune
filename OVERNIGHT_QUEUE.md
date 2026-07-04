@@ -43,6 +43,8 @@
 
 ## タスクキュー（優先度順・上から実行）
 
+> **ブランチ方針（更新・上書き）**: オーバーナイトの作業は全て **`feat/web-dashboard-phase1` に集約**する（各タスク内の「別ブランチを切る」指示は**無視**）。PR は **#8 (au-aii/howtune)** を umbrella とし、朝にユーザーが **squash-merge** する。個別マージは AI 単独では不可（分類器がブロック）。
+
 ### Tier 1 — 低リスク・高価値
 
 - [x] **T1-1: `AI_USAGE_LOG.md` に本日(2026-07-05)分を記録**
@@ -63,7 +65,7 @@
   - 検証: 各ファイル整合（目視）＋ `docs/roadmap.md` の該当項目 `[x]`
   - ブランチ: `feat/web-dashboard-phase1`
 
-- [ ] **T1-4: Phase 1+2 を personal で PR → マージ**
+- [x] **T1-4: Phase 1+2 を personal で PR 作成**（マージは人間レビュー待ち → `[blocked]`。PR: https://github.com/au-aii/howtune/pull/8）
   - 手順: `git push personal feat/web-dashboard-phase1` → `gh pr create --repo au-aii/howtune --base main --head feat/web-dashboard-phase1 --title "feat: Web ダッシュボード Phase 1+2（本人閲覧＋曲別インサイト）" --body "..."` → CI 無ければ `gh pr merge --repo au-aii/howtune --merge`（or squash）
   - 注意: **personal のみ**。`origin` へは触らない。guard.sh に触れないよう main へ直接は触らず PR 経由。
   - 検証: PR がマージされ personal/main に反映（`gh pr view`）
@@ -105,7 +107,7 @@
 
 ## ブロック記録（loop が追記する。ユーザーが朝に見る）
 
-（まだ無し）
+- **PR #8 のマージ**（T1-4）: auto-mode 分類器が「AI が自作 PR を無レビューでマージ」を拒否。web ビルド green・Phase1+2 は動作検証済み。→ **ユーザーが https://github.com/au-aii/howtune/pull/8 を確認して squash-merge**してください。
 
 ## 進捗ログ（loop が1行ずつ追記）
 
@@ -113,3 +115,4 @@
 - 2026-07-05 T1-1 完了: AI_USAGE_LOG に本日分 #017–#020 追記。
 - 2026-07-05 T1-2 完了: ADR-0008 ダーク/ライト追従を作成、roadmap 更新。
 - 2026-07-05 T1-3 完了: architecture/repository-structure/PRD に web/ サーフェス追記。
+- 2026-07-05 T1-4: web ビルド green → personal に push → PR #8 作成。マージは分類器ブロックでユーザー待ち。
