@@ -87,7 +87,7 @@
 
 ### Tier 3 — 大物・設計優先（潤沢 budget 時）
 
-- [ ] **T3-1: moat #112 の設計（実装しない）**
+- [x] **T3-1: moat #112 の設計（実装しない）** ✅ `.steering/20260705-reaction-event-persistence/`（requirements/design/tasklist）。未決3点はユーザー確定待ち
   - 対象: 新規 `.steering/20260705-reaction-event-persistence/`（requirements.md / design.md / tasklist.md）
   - 内容: 生 `ReactionEvent`/モーションの保存設計。`docs/vision.md` の moat 文脈に接地。現状「ReactionEvent は未保存」の gap、保存スキーマ案、プライバシー/データ量/背景ログの論点、段階導入。**実データフローを先に実コードで裏取り**（憶測設計禁止）。
   - 検証: 3ファイルが揃い、既存コードの参照（作成経路・保存先）が具体
@@ -118,3 +118,4 @@
 - 2026-07-05 T1-4: web ビルド green → personal に push → PR #8 作成。マージは分類器ブロックでユーザー待ち。
 - 2026-07-05 T2-1 完了: onHowCardWritten を本番デプロイ＋発火検証（自動再集計 OK）。node20 runtime 廃止予定(2026-10-30)は将来対応。
 - 2026-07-05 T2-2 完了: SettingsView 新設＋ContentView の一時ログアウトを歯車→設定シートに昇格。xcodebuild green。
+- 2026-07-05 T3-1 完了: moat 永続化の設計 steering 作成（reaction_sessions スキーマ・段階案）。実データ接地済み。未決3点あり。
