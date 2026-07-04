@@ -28,6 +28,8 @@ export default function Dashboard({ user }: { user: User }) {
   const [cards, setCards] = useState<HowCard[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedSongId, setSelectedSongId] = useState<string | null>(null);
+  const [browseSongId, setBrowseSongId] = useState<string | null>(null);
+  const [songIdInput, setSongIdInput] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -56,6 +58,59 @@ export default function Dashboard({ user }: { user: User }) {
           ログアウト
         </button>
       </header>
+
+      <section className="si-section-wrap">
+        <h3 className="si-section-title">曲別インサイトを探す</h3>
+        <p className="muted" style={{ marginTop: -4 }}>
+          曲IDを入れると、その曲の匿名インサイト（反応密度＋Howタグ）を見られます。自分の
+          How カードが無くても閲覧できます。
+        </p>
+        <div
+          style={{
+            display: "flex",
+            gap: 8,
+            flexWrap: "wrap",
+            marginBottom: 12,
+          }}
+        >
+          <input
+            value={songIdInput}
+            onChange={(e) => setSongIdInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && songIdInput.trim())
+                setBrowseSongId(songIdInput.trim());
+            }}
+            placeholder="曲ID（例: howtune-demo-song）"
+            aria-label="曲ID"
+            style={{
+              flex: "1 1 220px",
+              padding: "8px 12px",
+              borderRadius: 8,
+              border: "1px solid var(--separator, rgba(128,128,128,0.4))",
+              background: "transparent",
+              color: "inherit",
+            }}
+          />
+          <button
+            className="si-song-tab"
+            onClick={() =>
+              songIdInput.trim() && setBrowseSongId(songIdInput.trim())
+            }
+          >
+            見る
+          </button>
+          <button
+            className="si-song-tab"
+            onClick={() => {
+              setSongIdInput("howtune-demo-song");
+              setBrowseSongId("howtune-demo-song");
+            }}
+          >
+            デモ曲を見る
+          </button>
+        </div>
+        {browseSongId && <SongInsightPanel songId={browseSongId} />}
+      </section>
 
       {cards && cards.length > 0 && (
         <div className="stats">
