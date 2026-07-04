@@ -4,10 +4,30 @@ import { useEffect, useState } from "react";
 import { signOut, type User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { fetchMyHowCards, formatRange, type HowCard } from "@/lib/howCards";
+import SongInsightPanel from "@/components/SongInsight";
+
+interface SongEntry {
+  songId: string;
+  label: string;
+}
+
+function distinctSongs(cards: HowCard[]): SongEntry[] {
+  const seen = new Map<string, string>();
+  for (const c of cards) {
+    if (!seen.has(c.songId)) {
+      seen.set(c.songId, c.artistName ?? c.songTitle ?? c.songId);
+    }
+  }
+  return Array.from(seen.entries()).map(([songId, label]) => ({
+    songId,
+    label,
+  }));
+}
 
 export default function Dashboard({ user }: { user: User }) {
   const [cards, setCards] = useState<HowCard[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedSongId, setSelectedSongId] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -83,6 +103,26 @@ export default function Dashboard({ user }: { user: User }) {
             </article>
           ))}
         </div>
+      )}
+
+      {cards && cards.length > 0 && (
+        <section className="si-section-wrap">
+          <h3 className="si-section-title">曲別インサイト</h3>
+          <div className="si-song-tabs">
+            {distinctSongs(cards).map(({ songId, label }) => (
+              <button
+                key={songId}
+                className={`si-song-tab${selectedSongId === songId ? " active" : ""}`}
+                onClick={() =>
+                  setSelectedSongId((prev) => (prev === songId ? null : songId))
+                }
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {selectedSongId && <SongInsightPanel songId={selectedSongId} />}
+        </section>
       )}
     </div>
   );

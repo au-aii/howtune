@@ -59,6 +59,13 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // 匿名集計インサイト（ADR-0007 / Phase 2）: 認証済みは read 可（user_id を含まない前計算データ）。
+    // 書き込みは Functions(admin) のトリガーのみ＝クライアント write 不可。
+    match /song_insights/{songId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
     // リアルタイム DM（ADR-0006）: conversationId = ソート済み uid を "__" で連結。
     // 参加者（uid が cid に含まれる）だけが read/write 可。
     function isConversationParticipant(cid) {
