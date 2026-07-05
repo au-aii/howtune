@@ -64,6 +64,16 @@ async function recomputeSongInsights(songId) {
   const reactorIds = new Set(cards.map((c) => c.user_id));
   const reactorCount = reactorIds.size;
 
+  // アーティスト単位で引けるようにカタログのアーティスト情報を載せる（個人情報ではない）。
+  const artistCard =
+    cards.find((c) => typeof c.artist_id === "string" && c.artist_id) || {};
+  const artistId =
+    typeof artistCard.artist_id === "string" ? artistCard.artist_id : null;
+  const artistName =
+    typeof artistCard.artist_name === "string" ? artistCard.artist_name : null;
+  const songTitle =
+    typeof artistCard.song_title === "string" ? artistCard.song_title : null;
+
   // 曲レベル k-匿名性: 5 人未満なら insight を消す（非表示）
   if (reactorCount < MIN_REACTORS) {
     await insightRef.delete().catch(() => {});
@@ -102,6 +112,10 @@ async function recomputeSongInsights(songId) {
 
   await insightRef.set({
     song_id: songId,
+    // カタログのアーティスト情報（アーティスト別ダッシュボードで曲を束ねるため。個人情報ではない）
+    artist_id: artistId,
+    artist_name: artistName,
+    song_title: songTitle,
     reactor_count: reactorCount,
     density,
     tags: tagCounts,

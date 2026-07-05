@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { signOut, type User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { fetchMyHowCards, formatRange, type HowCard } from "@/lib/howCards";
+import { fetchArtistSongInsights, type SongInsight } from "@/lib/songInsights";
 import SongInsightPanel from "@/components/SongInsight";
 
 interface SongEntry {
@@ -30,6 +31,28 @@ export default function Dashboard({ user }: { user: User }) {
   const [selectedSongId, setSelectedSongId] = useState<string | null>(null);
   const [browseSongId, setBrowseSongId] = useState<string | null>(null);
   const [songIdInput, setSongIdInput] = useState("");
+  const [artistIdInput, setArtistIdInput] = useState("");
+  const [artistSongs, setArtistSongs] = useState<SongInsight[] | null>(null);
+  const [artistSelectedSongId, setArtistSelectedSongId] = useState<
+    string | null
+  >(null);
+  const [artistError, setArtistError] = useState<string | null>(null);
+  const [artistLoading, setArtistLoading] = useState(false);
+
+  const loadArtist = (idOverride?: string) => {
+    const id = (idOverride ?? artistIdInput).trim();
+    if (!id) return;
+    setArtistError(null);
+    setArtistSongs(null);
+    setArtistSelectedSongId(null);
+    setArtistLoading(true);
+    fetchArtistSongInsights(id)
+      .then((rows) => setArtistSongs(rows))
+      .catch(() =>
+        setArtistError("アーティストのインサイトを読み込めませんでした"),
+      )
+      .finally(() => setArtistLoading(false));
+  };
 
   useEffect(() => {
     let active = true;
@@ -110,6 +133,95 @@ export default function Dashboard({ user }: { user: User }) {
           </button>
         </div>
         {browseSongId && <SongInsightPanel songId={browseSongId} />}
+      </section>
+
+      <section className="si-section-wrap">
+        <h3 className="si-section-title">アーティストとして見る</h3>
+        <p className="muted" style={{ marginTop: -4 }}>
+          アーティストID（Apple Music
+          カタログ名義）を入れると、その名義の全曲の反応インサイトをまとめて見られます。
+          ※現状は自己申告で、認証・所有権の検証は今後（Apple Music for Artists
+          等）。
+        </p>
+        <div
+          style={{
+            display: "flex",
+            gap: 8,
+            flexWrap: "wrap",
+            marginBottom: 12,
+          }}
+        >
+          <input
+            value={artistIdInput}
+            onChange={(e) => setArtistIdInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") loadArtist();
+            }}
+            placeholder="アーティストID（例: howtune）"
+            aria-label="アーティストID"
+            style={{
+              flex: "1 1 220px",
+              padding: "8px 12px",
+              borderRadius: 8,
+              border: "1px solid var(--separator, rgba(128,128,128,0.4))",
+              background: "transparent",
+              color: "inherit",
+            }}
+          />
+          <button className="si-song-tab" onClick={() => loadArtist()}>
+            見る
+          </button>
+          <button
+            className="si-song-tab"
+            onClick={() => {
+              setArtistIdInput("howtune");
+              loadArtist("howtune");
+            }}
+          >
+            デモ（howtune）
+          </button>
+        </div>
+        {artistLoading && <p className="muted">読み込み中…</p>}
+        {artistError && <p className="error">{artistError}</p>}
+        {artistSongs && artistSongs.length === 0 && !artistLoading && (
+          <p className="muted">
+            この名義の公開インサイトはまだありません（反応者5人以上の曲が対象）。
+          </p>
+        )}
+        {artistSongs && artistSongs.length > 0 && (
+          <>
+            <div className="stats">
+              <div className="stat">
+                <div className="num">{artistSongs.length}</div>
+                <div className="lbl">SONGS</div>
+              </div>
+              <div className="stat">
+                <div className="num">
+                  {artistSongs.reduce((s, x) => s + x.reactor_count, 0)}
+                </div>
+                <div className="lbl">TOTAL REACTORS</div>
+              </div>
+            </div>
+            <div className="si-song-tabs">
+              {artistSongs.map((s) => (
+                <button
+                  key={s.song_id}
+                  className={`si-song-tab${artistSelectedSongId === s.song_id ? " active" : ""}`}
+                  onClick={() =>
+                    setArtistSelectedSongId((prev) =>
+                      prev === s.song_id ? null : s.song_id,
+                    )
+                  }
+                >
+                  {(s.song_title ?? s.song_id) + "（" + s.reactor_count + "）"}
+                </button>
+              ))}
+            </div>
+            {artistSelectedSongId && (
+              <SongInsightPanel songId={artistSelectedSongId} />
+            )}
+          </>
+        )}
       </section>
 
       {cards && cards.length > 0 && (

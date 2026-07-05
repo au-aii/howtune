@@ -14,11 +14,26 @@
 - [x] `personal` に push（PR #8 umbrella に反映）
 - [ ] **hosting へ deploy はユーザーがPR確認後に実行**（auto-mode 分類器が自動 deploy をブロック＝正しい）
 
-## フェーズ P3-B: アーティスト層（**未決3点の確定後に着手**）
+## 決定（2026-07-05 確定）
 
-- [ ] `artists` / `song_ownership` コレクションと rules
-- [ ] アーティスト画面（所有曲の `song_insights` を束ねて表示）
-- [ ] 検証: rules テスト・所有曲のみ表示
+- ④ 認証: **まず認証なし・自己申告で体験を出す**（Sign in with Apple / MusicKit は将来）
+- ⑤ 所有権: **自己クレーム**（Apple Music アーティストに紐付け。soft検証＝Apple Music for Artists 等は将来）
+- ⑥ キー: **Apple Music の `artist_id`**（既存 how-card のカタログ情報を流用）
+
+## フェーズ P3-B（MVP・自己申告アーティストビュー）← 実装済み
+
+- [x] `functions/repositories/insights.js` に `artist_id`/`artist_name`/`song_title` を集計出力へ追加（アーティスト単位で `song_insights` を引けるように。個人情報ではない）
+- [x] `web/src/lib/songInsights.ts` に `fetchArtistSongInsights(artistId)`（`song_insights` を `artist_id==X` で list）
+- [x] `web/src/components/Dashboard.tsx` に「アーティストとして見る」（名義の全曲の反応をまとめて表示、自己申告）
+- [x] 検証: `npm run build` green（node@22）、デモ曲 recompute で `artist_id=howtune` 付与を確認
+- [ ] hosting + functions（artist_id 付与のトリガー反映）の再デプロイは**ユーザーが PR 確認後**
+
+## フェーズ P3-B2: 永続クレーム＋検証（将来）
+
+- [ ] `artists`/`song_ownership` コレクション＋rules（永続的なアーティストアカウント・所有権）
+- [ ] Apple Music for Artists / Spotify for Artists 等での所有権検証（soft→強）
+
+## 旧・未決（→ 上の「決定」で解消済み）
 
 ## フェーズ P3-C: 検証フロー・外部連携（将来）
 
