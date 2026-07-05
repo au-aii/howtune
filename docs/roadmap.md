@@ -23,7 +23,7 @@
 - [x] **Phase 2**: `song_insights` 集計（密度＝How カード区間 / **推定タグ** / k=5）＋Web 表示 ✅集計トリガー `onHowCardWritten` 本番デプロイ済み・発火検証済み（カード追加/削除で自動再集計を確認）
 - [ ] personal 内で PR → マージ（Phase 1+2）
 - [ ] **生 ReactionEvent 保存で「本物の反応密度＋タグ」に（moat）** → [issue #112](https://github.com/engineer-guild-hackathon-2026-05/team-10/issues/112)
-  - 設計 steering 作成済み: `.steering/20260705-reaction-event-persistence/`（`reaction_sessions` スキーマ・段階案 P-a/b/c）。**未決3点（保存粒度・同意 opt-in/out・B2B 範囲）をユーザー確定後に P-a 実装着手**
+  - 設計 steering 作成済み: `.steering/20260705-reaction-event-persistence/`（`reaction_sessions` スキーマ・段階案 P-a/b/ML/c・**生理学的精査＋ML前提を統合**）。**未決4点（保存粒度・同意 opt-in/out・B2B 範囲・ML ラベル方針）をユーザー確定後に P-a 実装着手**
 - [ ] **Phase 3**: アーティスト認証・曲所有権・反応ヒートマップ（B2B インサイト）
   - [x] P3-A: 任意曲インサイト閲覧（`web/`、rules 変更なし）
   - [x] P3-B(MVP): 自己申告アーティストビュー（`song_insights` に `artist_id` を持たせ、名義の全曲を束ねて表示。`.steering/20260705-phase3-artist-insights/`）

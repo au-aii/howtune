@@ -23,12 +23,20 @@ AirPodsMotionSample（毎サンプル, on-device）
   "recorded_at": Timestamp,
   "duration_sec": 213.4,
   "consent_version": "v1",        // 同意バージョン（NFR-Privacy-2）
-  // 生全点ではなくダウンサンプル（NFR-Volume-1）: 0.5s バケットの intensity
+  // 表示用: 0.5s バケットの intensity（ダウンサンプル, NFR-Volume-1）
   "intensity": [ { "t": 44.0, "v": 0.82 }, { "t": 44.5, "v": 0.77 }, … ],
-  // 検出済み反応区間サマリ（ReactionEvent 由来）
+  // 検出済み反応区間サマリ（ReactionEvent 由来。タグは multi-label・排他でない）
   "events": [
-    { "start": 44.0, "end": 50.0, "intensity": 0.9, "tags": ["groove"], "hr_trend": "rising" }
-  ]
+    { "start": 44.0, "end": 50.0,
+      "tags": ["groove","hit"],        // multi-label
+      "arousal": 0.8, "valence": 0.1,  // 次元（valence は低確信）
+      "confidence": { "arousal": 0.9, "valence": 0.35 },
+      "hr_trend": "rising" }
+  ],
+  // --- ML 用（P-b 以降・任意）---
+  "self_report": { "tags": ["groove","hit"] },  // 弱教師＝ユーザーが選んだ How タグ
+  "hr": [ { "t": 44.0, "bpm": 96 }, … ],         // 補助 arousal 信号
+  "motion_features": "P-ML 層でのみ保存（後述・生全点は保存しない）"
 }
 ```
 
@@ -54,13 +62,34 @@ AirPodsMotionSample（毎サンプル, on-device）
 - 削除: 本人が設定画面（`SettingsView`）から自分の `reaction_sessions` を一括削除できる導線（将来）。
 - 生の姿勢(attitude)・加速度全点は保存しない（再識別リスク・データ量の低減）。
 
+## タグの再定義（生理接地・ML 前提）
+
+精査（requirements.md「生理学的接地と ML 前提」）を反映し、7タグを**直交クラスと見なさず、3層＋確信度**で扱う：
+
+- **実測層（高確信・センサーに情報あり）**: `arousal`(量) / `groove`(拍同期) / `hit`(スパイク)。頭部モーションで直接。
+- **推定層（低確信・多モーダル/文脈で補完）**: `valence`(快↔悲) / `immersion` / `afterglow`(=hit 後のフェーズ)。motion 単独では弱く、HR・音響・コメントで補う。
+- **追加候補**: `frisson`（測れれば旗艦。要 EDA 等の追加センサー・別 ADR）。
+
+保存は single-tag ではなく **multi-label タグ ＋ arousal/valence の連続値 ＋ 確信度**。UI/集計では確信度を正直に表示する。
+
+## 学習データ要件（ML flywheel）
+
+ML で反応推定を伸ばすには、**入力特徴と教師ラベルを対にして蓄積**する（信号に無い情報は学習で作れない）。
+
+- **教師ラベル（弱教師）**: ユーザーが選んだ How タグ（`self_report.tags`）＋任意で arousal/valence の自己申告。
+- **入力特徴**: motion（`interactionIntensity` 時系列＋P-ML で `userAcceleration`/`rotationRate`/`attitude` の**特徴量**＝周期性・スペクトル・分散等。生全点は保存しない）／補助 HR（arousal）／音響特徴（テンポ・オンセット等、曲側）／コメント文（valence の弱教師）。
+- **個人化**: `user_id` 単位でモデル校正（frisson/groove 感受性の個人差）。B2B へは集計後の匿名値のみ（生特徴は本人スコープ）。
+- **flywheel**: 蓄積 → 学習（`OthelloActivityClassifier` を 3状態 → multi-label＋次元回帰＋時系列へ拡張）→ 推定改善 → 体験改善 → さらに蓄積。
+- **出発点**: 既存 `OthelloActivityClassifier`（Create ML・groove/chill/neutral）を土台に拡張。
+
 ## 段階案
 
-- **P-a（最小・moat 着火）**: `reaction_sessions` に `events` のみ保存 → 密度を「実反応区間」に。intensity 列は未保存。
-- **P-b**: intensity 0.5s ダウンサンプルを追加 → How カード非依存の連続密度。
-- **P-c（学習素材）**: 集計を雰囲気レコメンドの特徴量に接続（North Star）。
+- **P-a（最小・moat 着火）**: `reaction_sessions` に `events`（multi-label タグ）＋ `self_report.tags`（弱教師ラベル）を保存 → 密度を「実反応区間」に。**ラベルを最初から貯める**のが後の ML の生命線（スキーマは小さい）。
+- **P-b**: intensity 0.5s ダウンサンプル＋HR 系列を追加 → How カード非依存の連続密度＋arousal 信号。
+- **P-ML（学習）**: 頭部モーション特徴を蓄積し、`OthelloActivityClassifier` を **multi-label＋arousal/valence 回帰＋時系列**へ拡張。個人化。
+- **P-c（North Star）**: 学習した表現を「雰囲気レコメンド」の特徴量に接続。
 
-推奨は **P-a を先に**（スキーマ最小・プライバシー審査が軽い・すぐ密度が本物になる）。
+推奨は **P-a を先に**（スキーマ最小・プライバシー審査が軽い・すぐ密度が本物になる。ラベルも同時に貯め始める）。
 
 ## テスト戦略
 
