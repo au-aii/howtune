@@ -20,12 +20,17 @@
 - [x] Functions: `onReactionSessionWritten` トリガー（`onHowCardWritten` と同型）
 - [x] Functions: `recomputeSongInsights` を how-cards ∪ reaction_sessions の**統合区間**に拡張（後方互換）。**本番データで E2E 検証済み**（反応セッション追加→reactor+1/groove+1→削除で復元）
 
-### 残り（iOS・デプロイ）
+### iOS（実装・ビルド検証済み）
 
-- [ ] iOS: 曲停止時に `ReactionDetectionViewModel.events`（＋自己申告タグ）を `/reaction-sessions` へ POST（`FirebaseAPI.createReactionSession`）。**同意 opt-in（既定 off）チェック**必須
-- [ ] iOS: `SettingsView` に「反応データの蓄積に同意」トグル（`@AppStorage`＋任意で users doc）
-- [ ] デプロイ（ユーザー）: `firebase deploy --only functions,firestore:rules`（トリガー・route・rules を本番反映）
-- [ ] 検証: rules で他人の reaction_sessions が read 不可、iOS `xcodebuild` green
+- [x] iOS: `ContentView` で NowPlaying セッションに検出を束ねる（`reactionDetector.startSession()` / `airPods.latestSample` を `ingest` / 停止で `stopSession`）→ 曲停止時に `events` を `/reaction-sessions` へ POST（`FirebaseAPI.createReactionSession`）。**同意 opt-in（既定 off）チェック**付き
+- [x] iOS: `SettingsView` に「反応データの蓄積に同意」トグル（`@AppStorage("reactionDataConsentV1")`）
+- [x] iOS: `Services/ReactionSessionPayload.swift`＋`FirebaseAPI.createReactionSession`。`xcodebuild` BUILD SUCCEEDED
+
+### 残り（フォローアップ・デプロイ・実機）
+
+- [ ] **self_report ラベルの配線**（弱教師）: 現状 `self_report_tags` は空送信。セッション中にユーザーが選んだ How タグ（card 作成時の selectedTags 等）を集約して載せる
+- [ ] デプロイ（ユーザー）: `firebase deploy --only functions,firestore:rules`（route・トリガー・rules を本番反映）
+- [ ] 実機検証: AirPods 装着で `events` が実際に生成→送信されることを確認（Simulator はモーション無し）＋ rules で他人の reaction_sessions が read 不可
 
 ## フェーズ P-b: intensity ダウンサンプル
 

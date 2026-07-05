@@ -5,6 +5,7 @@ import SwiftUI
 struct SettingsView: View {
     @ObservedObject var authVM: AuthViewModel
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("reactionDataConsentV1") private var reactionConsent = false
 
     var body: some View {
         NavigationStack {
@@ -19,6 +20,15 @@ struct SettingsView: View {
                     } label: {
                         Label("ログアウト", systemImage: "rectangle.portrait.and.arrow.right")
                     }
+                }
+
+                Section("反応データ") {
+                    Toggle("反応データの蓄積に同意", isOn: $reactionConsent)
+                    Text(
+                        "オンにすると、曲を聴いたときの頭の動きから検出した反応（区間とタグ）を匿名で蓄積し、インサイトの精度向上に使います。本人だけが閲覧でき、いつでもオフにできます。"
+                    )
+                    .font(.footnote)
+                    .foregroundStyle(Color(.secondaryLabel))
                 }
 
                 Section("アプリについて") {

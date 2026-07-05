@@ -28,6 +28,47 @@ final class FirebaseAPI {
         return id
     }
 
+    /// 反応セッション（moat P-a）を保存する。同意チェックは呼び出し側の責務。
+    func createReactionSession(
+        song: Song,
+        events: [ReactionEvent],
+        selfReportTags: [String] = [],
+        consentVersion: String = "v1",
+        durationSec: Double? = nil
+    ) async throws {
+        let payload = ReactionSessionPayload(
+            song_id: song.firestoreSongID,
+            song_title: song.title,
+            artist_id: song.firestoreArtistID,
+            artist_name: song.artistName,
+            duration_sec: durationSec ?? song.duration,
+            consent_version: consentVersion,
+            events: events.map { event in
+                ReactionSessionEventPayload(
+                    start: event.startTime,
+                    end: event.endTime,
+                    tags: event.tags.map(\.rawValue),
+                    intensity: event.intensity,
+                    hr_trend: Self.hrTrendString(event.heartRateTrend)
+                )
+            },
+            self_report_tags: selfReportTags
+        )
+        let _: ReactionSessionResponse = try await send(
+            path: "reaction-sessions",
+            method: "POST",
+            body: payload
+        )
+    }
+
+    private static func hrTrendString(_ trend: HeartRateTrend) -> String {
+        switch trend {
+        case .rising: return "rising"
+        case .stable: return "stable"
+        case .falling: return "falling"
+        }
+    }
+
     func updateHowCard(_ howCard: HowCardComment) async throws {
         guard let id = howCard.documentID else {
             throw FirebaseAPIError.missingDocumentID
