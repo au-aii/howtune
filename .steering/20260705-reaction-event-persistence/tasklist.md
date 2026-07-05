@@ -26,7 +26,9 @@
 - [x] iOS: `SettingsView` に「反応データの蓄積に同意」トグル（`@AppStorage("reactionDataConsentV1")`）
 - [x] iOS: `Services/ReactionSessionPayload.swift`＋`FirebaseAPI.createReactionSession`。`xcodebuild` BUILD SUCCEEDED
 
-### 残り（フォローアップ・デプロイ・実機）
+### 残り（フォローアップ・デプロイ・実機）→ [issue #9](https://github.com/au-aii/howtune/issues/9)
+
+> デプロイは 2026-07-05 完了（本番トリガー稼働・検証済み）。以下は明日以降。
 
 - [ ] **self_report ラベルの配線**（弱教師）: 現状 `self_report_tags` は空送信。セッション中にユーザーが選んだ How タグ（card 作成時の selectedTags 等）を集約して載せる
 - [ ] デプロイ（ユーザー）: `firebase deploy --only functions,firestore:rules`（route・トリガー・rules を本番反映）
