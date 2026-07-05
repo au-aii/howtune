@@ -1,0 +1,985 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>リアクション・リプレイ — HowTune listener concept (3D PoC)</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --ground: #0e0a0c;
+        --ground-2: #140e11;
+        --surface: #1c1418;
+        --bezel: #271b20;
+        --brand: #ff4d4d;
+        --text: #f5edef;
+        --muted: #a89ba0;
+        --faint: #6f636a;
+        --line: rgba(245, 237, 239, 0.1);
+        --display: "SF Pro Display", -apple-system, system-ui, "Hiragino Sans",
+          sans-serif;
+        --body: -apple-system, system-ui, "Hiragino Sans", sans-serif;
+        --mono: ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--ground);
+      }
+      .page {
+        min-height: 100%;
+        background: radial-gradient(
+          120% 90% at 50% -10%,
+          #1a1013 0%,
+          var(--ground-2) 42%,
+          var(--ground) 100%
+        );
+        color: var(--text);
+        font-family: var(--body);
+        -webkit-font-smoothing: antialiased;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 26px;
+        padding: 44px 20px 64px;
+      }
+      .intro {
+        max-width: 560px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .eyebrow {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+        color: var(--brand);
+        margin: 0;
+      }
+      .intro h1 {
+        font-family: var(--display);
+        font-weight: 800;
+        font-size: clamp(30px, 7vw, 48px);
+        letter-spacing: -0.02em;
+        line-height: 1.02;
+        margin: 0;
+        text-wrap: balance;
+      }
+      .lede {
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.65;
+        margin: 0;
+        text-wrap: balance;
+      }
+      .lede em {
+        color: var(--text);
+        font-style: normal;
+        font-weight: 600;
+      }
+      .stage-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+      }
+      .phone {
+        width: min(360px, 88vw);
+        aspect-ratio: 360 / 720;
+        border-radius: 42px;
+        background: linear-gradient(180deg, #17101300, #0b0709);
+        border: 1px solid var(--bezel);
+        box-shadow:
+          0 1px 0 rgba(255, 255, 255, 0.05) inset,
+          0 40px 90px -30px #000,
+          0 0 0 8px #0a0708;
+        padding: 14px 12px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        position: relative;
+      }
+      .phone-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 4px 8px 10px;
+        z-index: 2;
+      }
+      .song {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+      .song-title {
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .song-artist {
+        font-size: 11px;
+        color: var(--faint);
+        font-family: var(--mono);
+        letter-spacing: 0.06em;
+      }
+      .live-tag {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        padding: 5px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        color: var(--muted);
+        white-space: nowrap;
+        transition:
+          color 0.25s,
+          border-color 0.25s,
+          background 0.25s;
+      }
+      .stage {
+        flex: 1;
+        width: 100%;
+        display: block;
+        border-radius: 24px;
+        cursor: grab;
+        touch-action: none;
+      }
+      .stage:active {
+        cursor: grabbing;
+      }
+      .phone-bottom {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 6px 6px;
+        z-index: 2;
+      }
+      .play {
+        flex: none;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        border: none;
+        background: var(--brand);
+        color: #1a0709;
+        font-size: 15px;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        box-shadow: 0 6px 20px -6px var(--brand);
+        transition: transform 0.15s;
+      }
+      .play:hover {
+        transform: scale(1.06);
+      }
+      .play:active {
+        transform: scale(0.96);
+      }
+      .timeline {
+        flex: 1;
+        height: 26px;
+        position: relative;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+      }
+      .tl-track {
+        position: absolute;
+        inset: 50% 0 auto 0;
+        height: 4px;
+        transform: translateY(-50%);
+        background: rgba(245, 237, 239, 0.12);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .tl-fill {
+        position: absolute;
+        inset: 50% auto auto 0;
+        height: 4px;
+        transform: translateY(-50%);
+        width: 0%;
+        background: linear-gradient(90deg, var(--brand), #ff8a6a);
+        border-radius: 999px;
+        box-shadow: 0 0 12px -2px var(--brand);
+      }
+      .tl-mark {
+        position: absolute;
+        top: 50%;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 0 8px currentColor;
+      }
+      .tc {
+        flex: none;
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 0.04em;
+        font-variant-numeric: tabular-nums;
+        min-width: 30px;
+        text-align: right;
+      }
+      .resonance-flash {
+        position: absolute;
+        inset: 0;
+        border-radius: 42px;
+        pointer-events: none;
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0) inset;
+        transition: box-shadow 0.4s;
+        z-index: 1;
+      }
+      .stage-caption {
+        max-width: 360px;
+        text-align: center;
+        font-size: 12px;
+        line-height: 1.6;
+        color: var(--faint);
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px 26px;
+        justify-content: center;
+        align-items: center;
+      }
+      .ctl-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .ctl-label {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+      .seg {
+        display: inline-flex;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 3px;
+      }
+      .seg button {
+        border: none;
+        background: transparent;
+        color: var(--muted);
+        font-family: var(--body);
+        font-size: 13px;
+        padding: 7px 14px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition:
+          color 0.2s,
+          background 0.2s;
+      }
+      .seg button.on {
+        background: var(--text);
+        color: #16090c;
+        font-weight: 600;
+      }
+      .toggle {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        color: var(--text);
+        font-family: var(--body);
+        font-size: 13px;
+        padding: 9px 16px;
+        border-radius: 999px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+      }
+      .toggle .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--faint);
+        transition:
+          background 0.2s,
+          box-shadow 0.2s;
+      }
+      .toggle.on {
+        border-color: rgba(255, 255, 255, 0.5);
+        background: #241a1e;
+      }
+      .toggle.on .dot {
+        background: #fff;
+        box-shadow: 0 0 10px #fff;
+      }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px 14px;
+        align-items: center;
+        max-width: 560px;
+        font-size: 12px;
+        color: var(--faint);
+      }
+      .legend .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.04em;
+      }
+      .legend .chip i {
+        width: 9px;
+        height: 9px;
+        border-radius: 3px;
+        display: inline-block;
+      }
+      .note {
+        max-width: 520px;
+        text-align: center;
+        font-size: 12.5px;
+        line-height: 1.7;
+        color: var(--faint);
+        border-top: 1px solid var(--line);
+        padding-top: 20px;
+      }
+      .note b {
+        color: var(--muted);
+        font-weight: 600;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .play {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="intro">
+        <p class="eyebrow">HowTune · listener concept · 3D PoC</p>
+        <h1>リアクション・リプレイ</h1>
+        <p class="lede">
+          曲をもう一度。あのとき<em>体が動いた</em>瞬間が、色と鼓動でよみがえる。<br />
+          そして——同じ場所で同じ動きをした誰かと、頭の揺れがぴたりと<em>重なる</em>。
+        </p>
+      </header>
+
+      <div class="stage-wrap">
+        <div class="phone">
+          <div class="resonance-flash" id="flash"></div>
+          <div class="phone-top">
+            <div class="song">
+              <span class="song-title">深夜二時の改札</span>
+              <span class="song-artist">HowTune</span>
+            </div>
+            <span class="live-tag" id="momentTag">待機中</span>
+          </div>
+          <canvas class="stage" id="stage"></canvas>
+          <div class="phone-bottom">
+            <button class="play" id="play" aria-label="再生 / 一時停止">
+              ▶
+            </button>
+            <div
+              class="timeline"
+              id="timeline"
+              role="slider"
+              aria-label="再生位置"
+              aria-valuemin="0"
+              aria-valuemax="30"
+              aria-valuenow="0"
+              tabindex="0"
+            >
+              <div class="tl-track">
+                <div class="tl-fill" id="tlFill"></div>
+              </div>
+            </div>
+            <span class="tc" id="tc">0:00</span>
+          </div>
+        </div>
+        <p class="stage-caption">
+          ステージを<b style="color: var(--muted)">ドラッグ / スワイプ</b
+          >すると頭を3Dで回せます（離すと慣性で回転）。数字を読む B2B
+          ダッシュボードとは別物の"感じる"画面。
+        </p>
+      </div>
+
+      <div class="controls">
+        <div class="ctl-group">
+          <span class="ctl-label">表現</span>
+          <div class="seg" id="repSeg"></div>
+        </div>
+        <div class="ctl-group">
+          <span class="ctl-label">共鳴</span>
+          <button class="toggle" id="partnerBtn" aria-pressed="false">
+            <span class="dot"></span>同じ動きの人と重ねる
+          </button>
+        </div>
+      </div>
+
+      <div class="legend" id="legend"><span>How の色 —</span></div>
+
+      <footer class="note">
+        <b>PoC メモ</b>：頭の姿勢を pitch / roll / yaw の <b>3D</b>
+        で持ち、2点を回転→投影しています（yaw で回り込む）。表現は
+        <b>差し替え可能（プラガブル）</b>
+        な作りで、「イヤホン2点·3D」を基本に「人型」は任意の1スタイル。
+        新しい見せ方は <b>実装を1つ足すだけ</b>
+        で、再生・共鳴・データには触りません（Open / Closed）。
+      </footer>
+    </main>
+
+    <script>
+      (function () {
+        const TAGS = {
+          groove: "#ff7a4d",
+          hype: "#ffb020",
+          hit: "#ff3d6e",
+          immersion: "#7b6cff",
+          chill: "#37c2d6",
+          afterglow: "#c77dff",
+          neutral: "#8a8a99",
+        };
+        const DURATION = 30;
+        const YOU = [
+          { t: 3.6, tag: "groove", i: 0.55 },
+          { t: 8.4, tag: "hype", i: 0.8 },
+          { t: 14.0, tag: "hit", i: 1.0, res: true },
+          { t: 20.2, tag: "immersion", i: 0.72 },
+          { t: 26.0, tag: "afterglow", i: 0.5 },
+        ];
+        const MATE = [
+          { t: 4.4, tag: "groove", i: 0.5 },
+          { t: 9.2, tag: "chill", i: 0.6 },
+          { t: 14.0, tag: "hit", i: 1.0, res: true },
+          { t: 19.4, tag: "immersion", i: 0.66 },
+          { t: 25.2, tag: "afterglow", i: 0.55 },
+        ];
+        const SIGMA = 1.0;
+        const RES_HALF = 1.6;
+        const HEAD_R = 32;
+        const CAM_D = 140;
+        const FOCAL = 140;
+
+        const legendEl = document.getElementById("legend");
+        Object.keys(TAGS).forEach((k) => {
+          const s = document.createElement("span");
+          s.className = "chip";
+          s.innerHTML = '<i style="background:' + TAGS[k] + '"></i>' + k;
+          legendEl.appendChild(s);
+        });
+
+        const cv = document.getElementById("stage");
+        const ctx = cv.getContext("2d");
+        let W = 0,
+          H = 0,
+          dpr = 1;
+        function resize() {
+          dpr = Math.min(2, window.devicePixelRatio || 1);
+          const r = cv.getBoundingClientRect();
+          W = r.width;
+          H = r.height;
+          cv.width = Math.round(W * dpr);
+          cv.height = Math.round(H * dpr);
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+        new ResizeObserver(resize).observe(cv);
+
+        const reduced = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+
+        let t = 0,
+          playing = false,
+          last = 0,
+          partner = false,
+          resGlow = 0;
+        // 手動回転（スワイプ / ドラッグ）: 追加の yaw / pitch と慣性
+        let userYaw = 0,
+          userPitch = 0,
+          vYaw = 0,
+          vPitch = 0,
+          dragActive = false;
+
+        function reactionAt(list, time) {
+          let amp = 0,
+            tag = "neutral",
+            best = 0,
+            res = false;
+          for (const r of list) {
+            const d = time - r.t;
+            const e = r.i * Math.exp(-(d * d) / (2 * SIGMA * SIGMA));
+            amp = Math.max(amp, e);
+            if (e > best) {
+              best = e;
+              tag = r.tag;
+              res = !!r.res;
+            }
+          }
+          return { amp, tag, res };
+        }
+
+        // 頭部姿勢を3Dで（AirPods の attitude = pitch / roll / yaw に対応）
+        function headPose3D(time, amp, seed) {
+          const yaw =
+            Math.sin(time * 0.55 + seed) * 0.22 +
+            Math.sin(time * 3.1 + seed) * amp * 0.34;
+          const pitch =
+            Math.sin(time * 0.9 + seed * 1.7) * 0.06 +
+            Math.sin(time * 8 + seed) * amp * 0.3;
+          const roll =
+            Math.sin(time * 1.15 + seed) * 0.1 +
+            Math.sin(time * 6.3 + seed) * amp * 0.22;
+          const bob = amp * 16 + Math.sin(time * 2 + seed) * 2;
+          return { yaw, pitch, roll, bob };
+        }
+
+        function rot3(p, yaw, pitch, roll) {
+          let x = p.x * Math.cos(yaw) + p.z * Math.sin(yaw);
+          let z = -p.x * Math.sin(yaw) + p.z * Math.cos(yaw);
+          let y = p.y;
+          const y2 = y * Math.cos(pitch) - z * Math.sin(pitch);
+          const z2 = y * Math.sin(pitch) + z * Math.cos(pitch);
+          y = y2;
+          z = z2;
+          const x3 = x * Math.cos(roll) - y * Math.sin(roll);
+          const y3 = x * Math.sin(roll) + y * Math.cos(roll);
+          return { x: x3, y: y3, z };
+        }
+        function project(p, cx, cy) {
+          const s = FOCAL / (CAM_D - p.z);
+          return { x: cx + p.x * s, y: cy + p.y * s, z: p.z, s };
+        }
+
+        // 表現に依らない「頭のリグ」= 3D回転→投影した点群
+        function computeRig(pose, cx0, cy0) {
+          const cy = cy0 - pose.bob;
+          const P = (px, py, pz) =>
+            project(
+              rot3({ x: px, y: py, z: pz }, pose.yaw, pose.pitch, pose.roll),
+              cx0,
+              cy,
+            );
+          return {
+            cx: cx0,
+            cy,
+            pose,
+            left: P(-HEAD_R, 0, 0),
+            right: P(HEAD_R, 0, 0),
+            front: P(0, 0, HEAD_R),
+            top: P(0, -HEAD_R, 0),
+            stemL: P(-HEAD_R, HEAD_R * 0.95, HEAD_R * 0.12),
+            stemR: P(HEAD_R, HEAD_R * 0.95, HEAD_R * 0.12),
+          };
+        }
+
+        function withAlpha(hex, a) {
+          const n = parseInt(hex.slice(1), 16);
+          return (
+            "rgba(" +
+            ((n >> 16) & 255) +
+            "," +
+            ((n >> 8) & 255) +
+            "," +
+            (n & 255) +
+            "," +
+            a +
+            ")"
+          );
+        }
+
+        function bloom(x, y, color, amp) {
+          if (amp <= 0.02) return;
+          const g = ctx.createRadialGradient(x, y, 0, x, y, 120 * amp + 30);
+          g.addColorStop(0, withAlpha(color, 0.34 * amp));
+          g.addColorStop(1, withAlpha(color, 0));
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(x, y, 150 * amp + 40, 0, 7);
+          ctx.fill();
+          for (let k = 0; k < 3; k++) {
+            const ph = (t * 0.9 + k / 3) % 1;
+            ctx.beginPath();
+            ctx.arc(x, y, 30 + ph * (70 * amp + 40), 0, 7);
+            ctx.strokeStyle = withAlpha(color, (1 - ph) * 0.5 * amp);
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          }
+        }
+
+        // --- 表現1: イヤホン2点・3D（デフォルト）---
+        function drawBuds3D(g, rig, o) {
+          const color = o.color,
+            amp = o.amp,
+            ghost = o.ghost;
+          // 頭のバンド（left→top→right の弧。yaw/roll/pitch で3Dに動く）
+          g.beginPath();
+          g.moveTo(rig.left.x, rig.left.y);
+          g.quadraticCurveTo(rig.top.x, rig.top.y - 4, rig.right.x, rig.right.y);
+          g.strokeStyle = ghost ? withAlpha(color, 0.5) : color;
+          g.lineWidth = 3.4;
+          g.lineCap = "round";
+          g.stroke();
+          // 向き（front dot）= 顔がどっちを向いているか
+          g.beginPath();
+          g.arc(rig.front.x, rig.front.y, 3 * rig.front.s, 0, 7);
+          g.fillStyle = withAlpha(ghost ? "#ffffff" : color, 0.65);
+          g.fill();
+          // 耳（奥→手前の順に描く = ペインターズ）
+          const ears =
+            rig.left.z <= rig.right.z
+              ? [
+                  [rig.left, rig.stemL],
+                  [rig.right, rig.stemR],
+                ]
+              : [
+                  [rig.right, rig.stemR],
+                  [rig.left, rig.stemL],
+                ];
+          for (const [e, st] of ears) {
+            g.beginPath();
+            g.moveTo(e.x, e.y);
+            g.lineTo(st.x, st.y);
+            g.lineWidth = Math.max(1, 3 * e.s);
+            g.strokeStyle = ghost
+              ? withAlpha(color, 0.4)
+              : withAlpha(color, 0.85);
+            g.lineCap = "round";
+            g.stroke();
+            g.beginPath();
+            g.arc(e.x, e.y, 8.5 * e.s, 0, 7);
+            g.fillStyle = ghost ? withAlpha("#ffffff", 0.16) : "#161013";
+            g.fill();
+            g.lineWidth = Math.max(1.5, 3 * e.s);
+            g.strokeStyle = ghost ? withAlpha(color, 0.55) : color;
+            g.stroke();
+            g.beginPath();
+            g.arc(e.x, e.y, 3 * e.s, 0, 7);
+            g.fillStyle = withAlpha(color, 0.4 + amp * 0.6);
+            g.fill();
+          }
+        }
+
+        // --- 表現2: 人型（任意の1スタイル）---
+        function drawBody(g, rig, o) {
+          const color = o.color,
+            amp = o.amp,
+            ghost = o.ghost,
+            pose = rig.pose;
+          // yaw が大きくても反転しないよう abs でクランプ（人型のミラー崩壊防止）
+          const turn = 0.55 + 0.45 * Math.abs(Math.cos(pose.yaw));
+          g.save();
+          g.translate(rig.cx, rig.cy + 18);
+          g.save();
+          g.rotate(pose.roll * 0.5);
+          g.scale(turn, 1);
+          g.beginPath();
+          g.moveTo(-46, 70);
+          g.quadraticCurveTo(-40, 20, 0, 14);
+          g.quadraticCurveTo(40, 20, 46, 70);
+          g.closePath();
+          g.fillStyle = ghost ? withAlpha(color, 0.1) : withAlpha(color, 0.16);
+          g.fill();
+          g.strokeStyle = ghost ? withAlpha(color, 0.4) : color;
+          g.lineWidth = 2.5;
+          g.stroke();
+          g.restore();
+          g.save();
+          g.translate(0, -14 + pose.pitch * 18);
+          g.rotate(pose.roll);
+          g.scale(turn, 1);
+          g.beginPath();
+          g.arc(0, -16, 20, 0, 7);
+          g.fillStyle = ghost ? withAlpha(color, 0.12) : "#191115";
+          g.fill();
+          g.lineWidth = 3;
+          g.strokeStyle = ghost ? withAlpha(color, 0.5) : color;
+          g.stroke();
+          for (const sx of [-1, 1]) {
+            g.beginPath();
+            g.arc(sx * 19, -14, 3.4, 0, 7);
+            g.fillStyle = withAlpha(color, 0.5 + amp * 0.5);
+            g.fill();
+          }
+          g.restore();
+          g.restore();
+        }
+
+        // ★ 表現レジストリ：新スタイルはここに1エントリ足すだけ
+        //    （再生 / 共鳴 / データは不変 = Open / Closed）
+        const RENDERERS = {
+          buds3d: { label: "イヤホン2点·3D", draw: drawBuds3D },
+          body: { label: "人型", draw: drawBody },
+        };
+        const REP_ORDER = Object.keys(RENDERERS);
+        let rep = REP_ORDER[0];
+
+        function drawThread(x1, y1, x2, y2, k) {
+          const midx = (x1 + x2) / 2,
+            midy = Math.min(y1, y2) - 40 - k * 20;
+          for (let pass = 0; pass < 2; pass++) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.quadraticCurveTo(midx, midy, x2, y2);
+            ctx.strokeStyle =
+              pass === 0
+                ? withAlpha("#ffffff", 0.9 * k)
+                : withAlpha("#ffd9c2", 0.5 * k);
+            ctx.lineWidth = pass === 0 ? 2 : 7;
+            ctx.shadowColor = "#fff";
+            ctx.shadowBlur = 18 * k;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+          }
+          ctx.beginPath();
+          ctx.arc(midx, midy, 3 + k * 4, 0, 7);
+          ctx.fillStyle = withAlpha("#ffffff", k);
+          ctx.fill();
+        }
+
+        function background(amp) {
+          ctx.clearRect(0, 0, W, H);
+          const g = ctx.createRadialGradient(
+            W / 2,
+            H * 0.42,
+            10,
+            W / 2,
+            H * 0.42,
+            H * 0.7,
+          );
+          g.addColorStop(0, "#1c1216");
+          g.addColorStop(1, "#0c0709");
+          ctx.fillStyle = g;
+          ctx.fillRect(0, 0, W, H);
+          const bars = 22,
+            bw = W / bars;
+          for (let i = 0; i < bars; i++) {
+            const n =
+              0.5 +
+              0.5 * Math.sin(i * 0.6 + t * 3) * (0.3 + amp) +
+              Math.sin(i + t * 5) * amp * 0.4;
+            const h = Math.max(2, n * (18 + amp * 60));
+            ctx.fillStyle = withAlpha("#ff7a4d", 0.05 + amp * 0.12);
+            ctx.fillRect(i * bw + 2, H - h, bw - 4, h);
+          }
+        }
+
+        function frame(ts) {
+          if (!last) last = ts;
+          const dt = Math.min(0.05, (ts - last) / 1000);
+          last = ts;
+          if (playing) {
+            t += dt;
+            if (t >= DURATION) t = 0;
+          }
+          const you = reactionAt(YOU, t),
+            mate = reactionAt(MATE, t);
+          const ampAll = Math.max(you.amp, partner ? mate.amp : 0);
+          const resActive =
+            partner && Math.abs(t - 14.0) < RES_HALF && you.res ? 1 : 0;
+          const targetGlow = resActive ? 1 - Math.abs(t - 14.0) / RES_HALF : 0;
+          resGlow += (targetGlow - resGlow) * Math.min(1, dt * 6);
+          background(ampAll);
+          const cx = W / 2,
+            cy = H * 0.46;
+          // スワイプ/ドラッグの慣性（離した後もしばらく回る）
+          if (!dragActive) {
+            userYaw += vYaw;
+            vYaw *= 0.93;
+            userPitch = Math.max(-0.95, Math.min(0.95, userPitch + vPitch));
+            vPitch *= 0.9;
+            if (Math.abs(vYaw) < 0.0002) vYaw = 0;
+            if (Math.abs(vPitch) < 0.0002) vPitch = 0;
+          }
+          const youPose = headPose3D(t, you.amp, 0);
+          youPose.yaw += userYaw;
+          youPose.pitch += userPitch;
+          const draw = RENDERERS[rep].draw;
+          if (partner) {
+            let matePose;
+            if (resGlow > 0.02) {
+              matePose = {
+                yaw: youPose.yaw,
+                pitch: youPose.pitch,
+                roll: youPose.roll,
+                bob: youPose.bob,
+              };
+            } else {
+              matePose = headPose3D(t, mate.amp, 2.3);
+              matePose.yaw += userYaw;
+              matePose.pitch += userPitch;
+            }
+            const sep = 78 * (1 - resGlow * 0.55);
+            const yRig = computeRig(youPose, cx + sep, cy),
+              mRig = computeRig(matePose, cx - sep, cy);
+            const col = TAGS[you.tag] || TAGS.neutral;
+            const mcol = resGlow > 0.02 ? col : TAGS[mate.tag] || TAGS.neutral;
+            bloom(mRig.cx, mRig.cy, mcol, mate.amp * 0.6);
+            draw(ctx, mRig, { color: mcol, amp: mate.amp, ghost: true });
+            bloom(yRig.cx, yRig.cy, col, you.amp);
+            draw(ctx, yRig, { color: col, amp: you.amp, ghost: false });
+            if (resGlow > 0.02)
+              drawThread(yRig.top.x, yRig.top.y, mRig.top.x, mRig.top.y, resGlow);
+          } else {
+            const rig = computeRig(youPose, cx, cy);
+            const col = TAGS[you.tag] || TAGS.neutral;
+            bloom(rig.cx, rig.cy, col, you.amp);
+            draw(ctx, rig, { color: col, amp: you.amp, ghost: false });
+          }
+
+          document.getElementById("tlFill").style.width =
+            (t / DURATION) * 100 + "%";
+          document.getElementById("tc").textContent =
+            "0:" + String(Math.floor(t)).padStart(2, "0");
+          document
+            .getElementById("timeline")
+            .setAttribute("aria-valuenow", t.toFixed(0));
+          const mt = document.getElementById("momentTag");
+          const showTag =
+            (partner ? Math.max(you.amp, mate.amp) : you.amp) > 0.16;
+          if (resGlow > 0.35) {
+            mt.textContent = "共鳴";
+            mt.style.color = "#fff";
+            mt.style.borderColor = "#fff";
+            mt.style.background = "rgba(255,255,255,0.12)";
+          } else if (showTag) {
+            const tg = you.amp >= mate.amp ? you.tag : mate.tag;
+            mt.textContent = tg;
+            mt.style.color = TAGS[tg];
+            mt.style.borderColor = withAlpha(TAGS[tg], 0.6);
+            mt.style.background = withAlpha(TAGS[tg], 0.12);
+          } else {
+            mt.textContent = playing ? "聴取中" : "待機中";
+            mt.style.color = "var(--muted)";
+            mt.style.borderColor = "var(--line)";
+            mt.style.background = "transparent";
+          }
+          const flash = document.getElementById("flash");
+          flash.style.boxShadow =
+            "0 0 0 2px " +
+            withAlpha("#ffffff", resGlow * 0.8) +
+            " inset, 0 0 60px " +
+            withAlpha("#ffd9c2", resGlow * 0.5) +
+            " inset";
+          requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+
+        const tl = document.getElementById("timeline");
+        YOU.forEach((r) => {
+          const m = document.createElement("div");
+          m.className = "tl-mark";
+          m.style.left = (r.t / DURATION) * 100 + "%";
+          m.style.color = TAGS[r.tag];
+          m.style.background = TAGS[r.tag];
+          tl.appendChild(m);
+        });
+
+        // 表現トグルをレジストリから自動生成（= スタイルを足すと自動でボタンが増える）
+        const seg = document.getElementById("repSeg");
+        REP_ORDER.forEach((k, i) => {
+          const b = document.createElement("button");
+          b.dataset.rep = k;
+          b.textContent = RENDERERS[k].label;
+          if (i === 0) b.classList.add("on");
+          seg.appendChild(b);
+        });
+        seg.addEventListener("click", (e) => {
+          const b = e.target.closest("button");
+          if (!b) return;
+          rep = b.dataset.rep;
+          [...seg.children].forEach((c) => c.classList.toggle("on", c === b));
+        });
+
+        const playBtn = document.getElementById("play");
+        function setPlaying(p) {
+          playing = p;
+          playBtn.textContent = p ? "❚❚" : "▶";
+        }
+        playBtn.addEventListener("click", () => setPlaying(!playing));
+        if (!reduced) setPlaying(true);
+
+        function seekFromEvent(e) {
+          const r = tl.getBoundingClientRect();
+          const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+          t = Math.max(0, Math.min(1, x / r.width)) * DURATION;
+        }
+        let dragging = false;
+        tl.addEventListener("pointerdown", (e) => {
+          dragging = true;
+          seekFromEvent(e);
+        });
+        window.addEventListener("pointermove", (e) => {
+          if (dragging) seekFromEvent(e);
+        });
+        window.addEventListener("pointerup", () => (dragging = false));
+        tl.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowRight") t = Math.min(DURATION, t + 1);
+          if (e.key === "ArrowLeft") t = Math.max(0, t - 1);
+        });
+
+        const pBtn = document.getElementById("partnerBtn");
+        pBtn.addEventListener("click", () => {
+          partner = !partner;
+          pBtn.classList.toggle("on", partner);
+          pBtn.setAttribute("aria-pressed", partner ? "true" : "false");
+          if (partner) {
+            t = 12.4;
+            setPlaying(true);
+          }
+        });
+
+        // ステージをドラッグ/スワイプで頭を3D回転（離すと慣性）
+        let lastX = 0,
+          lastY = 0;
+        cv.addEventListener("pointerdown", (e) => {
+          dragActive = true;
+          lastX = e.clientX;
+          lastY = e.clientY;
+          vYaw = 0;
+          vPitch = 0;
+          try {
+            cv.setPointerCapture(e.pointerId);
+          } catch (_) {}
+        });
+        cv.addEventListener("pointermove", (e) => {
+          if (!dragActive) return;
+          const dx = e.clientX - lastX,
+            dy = e.clientY - lastY;
+          lastX = e.clientX;
+          lastY = e.clientY;
+          const S = 0.007;
+          userYaw += dx * S;
+          vYaw = dx * S;
+          userPitch = Math.max(-0.95, Math.min(0.95, userPitch + dy * S));
+          vPitch = dy * S;
+        });
+        function endDrag() {
+          dragActive = false;
+        }
+        cv.addEventListener("pointerup", endDrag);
+        cv.addEventListener("pointercancel", endDrag);
+      })();
+    </script>
+  </body>
+</html>
