@@ -9,15 +9,23 @@
 - [x] requirements.md（課題・要件・プライバシー・未決）
 - [x] design.md（`reaction_sessions` スキーマ・書き込み経路・段階案）
 - [x] 生理学的精査（frisson / groove / circumplex / 頭部モーション情動推定を文献裏取り）＋ ML 前提（multi-label・arousal/valence 回帰・時系列・多モーダル・個人化）を requirements/design に統合
-- [ ] **未決4点をユーザーが確定**（保存粒度 / 同意 opt-in・out / B2B 二次利用範囲 / ML ラベル方針）
+- [x] **未決4点を確定（2026-07-05）**：①保存粒度=events＋ラベルのみ ②同意=opt-in(既定off) ③B2B=密度精緻化まで ④MLラベル=弱教師＋multi-label＋arousal/valence次元
 
 ## フェーズ P-a: 最小（events + 弱教師ラベル・moat 着火）
 
-- [ ] `firestore.rules` に `reaction_sessions/{id}`（本人のみ read、書き込みは Functions/本人）
-- [ ] iOS: 曲停止時に `ReactionEvent[]`（multi-label タグ）＋ `self_report.tags`（弱教師ラベル）を `reaction_sessions` へバッチ書き込み（同意チェック付き）
-- [ ] Functions: `onReactionSessionWritten` トリガー（`onHowCardWritten` と同型）
-- [ ] Functions: `recomputeSongInsights` を `reaction_sessions.events` 由来の密度に拡張（How カードのみの曲はフォールバック）
-- [ ] 検証: エミュレータで書き込み→再集計、rules で他人読み取り不可、iOS `xcodebuild` green
+### バックエンド（実装・検証済み）
+
+- [x] `firestore.rules` に `reaction_sessions/{id}`（本人のみ read、書き込みは Functions のみ）
+- [x] Functions: `POST /reaction-sessions`（auth・`routes/reaction-sessions.js` ＋ `createReactionSession` repository。events multi-label タグ＋`self_report.tags` 弱教師ラベル）
+- [x] Functions: `onReactionSessionWritten` トリガー（`onHowCardWritten` と同型）
+- [x] Functions: `recomputeSongInsights` を how-cards ∪ reaction_sessions の**統合区間**に拡張（後方互換）。**本番データで E2E 検証済み**（反応セッション追加→reactor+1/groove+1→削除で復元）
+
+### 残り（iOS・デプロイ）
+
+- [ ] iOS: 曲停止時に `ReactionDetectionViewModel.events`（＋自己申告タグ）を `/reaction-sessions` へ POST（`FirebaseAPI.createReactionSession`）。**同意 opt-in（既定 off）チェック**必須
+- [ ] iOS: `SettingsView` に「反応データの蓄積に同意」トグル（`@AppStorage`＋任意で users doc）
+- [ ] デプロイ（ユーザー）: `firebase deploy --only functions,firestore:rules`（トリガー・route・rules を本番反映）
+- [ ] 検証: rules で他人の reaction_sessions が read 不可、iOS `xcodebuild` green
 
 ## フェーズ P-b: intensity ダウンサンプル
 

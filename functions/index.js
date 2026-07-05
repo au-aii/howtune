@@ -31,6 +31,19 @@ exports.onHowCardWritten = functionsV1
     await Promise.all([...songIds].map((id) => recomputeSongInsights(id)));
   });
 
+// 反応セッション（moat P-a）の作成/更新/削除で該当曲の song_insights を再集計
+exports.onReactionSessionWritten = functionsV1
+  .region("asia-northeast1")
+  .firestore.document("reaction_sessions/{sessionId}")
+  .onWrite(async (change) => {
+    const before = change.before.exists ? change.before.data() : null;
+    const after = change.after.exists ? change.after.data() : null;
+    const songIds = new Set();
+    if (before?.song_id) songIds.add(before.song_id);
+    if (after?.song_id) songIds.add(after.song_id);
+    await Promise.all([...songIds].map((id) => recomputeSongInsights(id)));
+  });
+
 exports.onUserSignup = functionsV1
   .region("asia-northeast1")
   .auth.user()

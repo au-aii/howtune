@@ -38,6 +38,37 @@ async function createHowCard({
   return serializeHowCard(ref.id, { ...data, created_at: null });
 }
 
+// 反応セッション（moat P-a）: 本人の user_id で保存。B2B へは Functions 集計・匿名化のみ。
+async function createReactionSession({
+  uid,
+  songId,
+  songTitle,
+  artistId,
+  artistName,
+  durationSec,
+  consentVersion,
+  events,
+  selfReportTags,
+}) {
+  const now = FieldValue.serverTimestamp();
+  const ref = db().collection("reaction_sessions").doc();
+  await ref.set({
+    user_id: uid,
+    song_id: songId,
+    song_title: songTitle ?? null,
+    artist_id: artistId ?? null,
+    artist_name: artistName ?? null,
+    duration_sec: durationSec ?? null,
+    consent_version: consentVersion ?? "v1",
+    events: Array.isArray(events) ? events : [],
+    // 弱教師ラベル（ユーザーが選んだ How タグ）＝将来の ML 学習用
+    self_report: { tags: Array.isArray(selfReportTags) ? selfReportTags : [] },
+    recorded_at: now,
+    created_at: now,
+  });
+  return { id: ref.id };
+}
+
 async function getHowCards({ songId, limit = 50 } = {}) {
   const collection = db().collection("how-cards");
 
@@ -501,6 +532,7 @@ function throwFirestoreError(message, code) {
 
 module.exports = {
   createHowCard,
+  createReactionSession,
   getHowCards,
   getHowCard,
   getRecommendedHowCards,
