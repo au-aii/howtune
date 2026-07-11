@@ -24,7 +24,7 @@ struct ResonanceMatchView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color(.systemBackground).ignoresSafeArea()
                 ScrollView {
                     VStack(spacing: 24) {
                         ignitionArea
@@ -72,16 +72,16 @@ struct ResonanceMatchView: View {
                 VStack(spacing: 8) {
                     Text("◌")
                         .font(.system(size: 40))
-                        .foregroundStyle(.white.opacity(0.5))
+                        .foregroundStyle(Color(.secondaryLabel))
                     Text("同じ瞬間に反応した人を探しています…")
                         .font(.footnote)
-                        .foregroundStyle(.white.opacity(0.6))
+                        .foregroundStyle(Color(.secondaryLabel))
                 }
             }
         }
         .frame(maxWidth: .infinity)
         .frame(height: 260)
-        .background(Color.white.opacity(0.03), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 
     private var hasSameSpot: Bool { !matchService.sameSpotReactors.isEmpty }
@@ -93,20 +93,20 @@ struct ResonanceMatchView: View {
             HStack {
                 Text("🔥 同じ瞬間で共鳴")
                     .font(.headline)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.label))
                 Spacer()
                 Text("\(matchService.sameSpotReactors.count)人")
                     .font(.caption.weight(.bold))
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(Color(.systemOrange))
             }
             if matchService.sameSpotReactors.isEmpty {
                 Text("まだいません。流れてきたら火がつきます。")
                     .font(.caption)
-                    .foregroundStyle(.white.opacity(0.45))
+                    .foregroundStyle(Color(.tertiaryLabel))
             } else {
                 ForEach(matchService.sameSpotReactors) { reactor in
                     NavigationLink(value: reactor) {
-                        reactorRow(reactor, accent: .orange, mark: "🔥")
+                        reactorRow(reactor, accent: Color(.systemOrange), mark: "🔥")
                     }
                     .buttonStyle(.plain)
                 }
@@ -144,14 +144,14 @@ struct ResonanceMatchView: View {
                 HStack(spacing: 6) {
                     Text(reactor.displayName)
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color(.label))
                     Text(reactor.spotLabel)
                         .font(.caption.monospacedDigit())
                         .foregroundStyle(accent)
                 }
                 Text(reactor.comment.isEmpty ? "（コメントなし）" : reactor.comment)
                     .font(.caption)
-                    .foregroundStyle(.white.opacity(0.6))
+                    .foregroundStyle(Color(.secondaryLabel))
                     .lineLimit(2)
             }
             Spacer()
@@ -160,7 +160,7 @@ struct ResonanceMatchView: View {
                 .foregroundStyle(accent)
         }
         .padding(14)
-        .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(accent.opacity(0.25), lineWidth: 1)

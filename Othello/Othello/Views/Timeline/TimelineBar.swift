@@ -60,7 +60,7 @@ struct TimelineBar: View {
                     let t = duration * Double(i) / Double(labelCount - 1)
                     Text(formatTime(t))
                         .font(.caption2.monospacedDigit())
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(Color(.secondaryLabel))
                     if i < labelCount - 1 { Spacer() }
                 }
             }

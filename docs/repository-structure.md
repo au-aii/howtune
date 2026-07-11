@@ -10,6 +10,7 @@ iOS ネイティブアプリ（`Othello/`）を中心に、バックエンド・
 team-10/
 ├── Othello/            # iOS ネイティブアプリ（Xcode / SwiftUI）
 ├── functions/          # Firebase Functions（本番 API）
+├── web/                # 閲覧用 Web ダッシュボード（Next.js / Firebase Hosting）
 ├── backend/            # 旧 Express 実装（deprecated / 参照用）
 ├── ai-recognition/     # 反応分類モデル（Create ML + TS）+ 教師データ収集アプリ
 ├── frontend/           # フロントエンド置き場（MVP 未使用）
@@ -86,6 +87,7 @@ Othello/Othello/
 ```
 
 **構成の方針**:
+
 - 新しい・独立性の高い機能は `Features/<機能>/`（Models/Protocols/Services/ViewModels/Views を内包）
 - 認証・ホーム・オンボーディングなど横断的なものはルート直下の `Views/` `ViewModels/`
 - センサー等は **Protocols/**（`AirPodsMotionManaging`, `PlaybackPositionProviding`, `LyricsProviding`）でインターフェースを定義しモック可能に
@@ -94,12 +96,25 @@ Othello/Othello/
 
 ## functions/ と backend/
 
-| ディレクトリ | 内容 | エンドポイント |
-|---|---|---|
-| `functions/` | Firebase Functions。**本番 API** | `/health`, `/how-cards`, `/users/me` |
-| `backend/` | deprecated な旧 Express 実装 | `/sessions` や Claude 連携の参照実装が残るが、本番には反映されない |
+| ディレクトリ | 内容                             | エンドポイント                                                     |
+| ------------ | -------------------------------- | ------------------------------------------------------------------ |
+| `functions/` | Firebase Functions。**本番 API** | `/health`, `/how-cards`, `/users/me`                               |
+| `backend/`   | deprecated な旧 Express 実装     | `/sessions` や Claude 連携の参照実装が残るが、本番には反映されない |
 
 > 新規 API 変更は `functions/` に追加する。`backend/` を編集しても本番 deploy には反映されない。
+
+---
+
+## web/（閲覧用 Web ダッシュボード）
+
+| 項目         | 内容                                                                                                                                       |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 技術         | Next.js（App Router）+ TypeScript、Firebase JS SDK、静的エクスポート（`output: "export"`）                                                 |
+| 役割         | **閲覧専用**。iOS と同じ Firebase Auth でログインし Firestore を直読み。収集は iOS、閲覧は Web（ADR-0007）                                 |
+| 主要ファイル | `web/src/lib/firebase.ts`（初期化）/ `howCards.ts`・`songInsights.ts`（データ取得）/ `components/Dashboard.tsx`・`SongInsight.tsx`（表示） |
+| 配信         | Firebase Hosting（`howtune-74252`、https://howtune-74252.web.app）。`web/out` を deploy                                                    |
+
+> Web は Firestore を**読むだけ**。書き込みは iOS→`functions/` 経由のまま（ADR-0002）。B2B は Functions 集計済み `song_insights`（匿名・k=5）だけを見せる。
 
 ---
 
@@ -122,15 +137,15 @@ ai-recognition/
 
 ## 命名規則（実態）
 
-| 対象 | 規則 | 例 |
-|------|------|-----|
-| Feature ディレクトリ | PascalCase | `AirPodsMotion/`, `ReactionDetection/` |
-| Swift 型・ファイル | PascalCase | `AirPodsMotionManager.swift`, `ReactionEvent.swift` |
-| Protocol | `〜ing` / `〜Providing` | `AirPodsMotionManaging`, `LyricsProviding` |
-| View | `〜View` | `HowChatView.swift` |
-| ViewModel | `〜ViewModel` | `ReactionDisplayViewModel.swift` |
-| Service | `〜Service` / `〜Manager` / `〜Provider` | `MusicKitPlaybackService`, `AirPodsMotionManager` |
-| backend ルート | kebab-case | `how-cards.js` |
+| 対象                 | 規則                                     | 例                                                  |
+| -------------------- | ---------------------------------------- | --------------------------------------------------- |
+| Feature ディレクトリ | PascalCase                               | `AirPodsMotion/`, `ReactionDetection/`              |
+| Swift 型・ファイル   | PascalCase                               | `AirPodsMotionManager.swift`, `ReactionEvent.swift` |
+| Protocol             | `〜ing` / `〜Providing`                  | `AirPodsMotionManaging`, `LyricsProviding`          |
+| View                 | `〜View`                                 | `HowChatView.swift`                                 |
+| ViewModel            | `〜ViewModel`                            | `ReactionDisplayViewModel.swift`                    |
+| Service              | `〜Service` / `〜Manager` / `〜Provider` | `MusicKitPlaybackService`, `AirPodsMotionManager`   |
+| backend ルート       | kebab-case                               | `how-cards.js`                                      |
 
 ---
 
@@ -162,15 +177,15 @@ ai-recognition (Create ML/TS) ──.mlmodel──┘（学習成果物を Othel
 
 ## docs/（ドキュメント）
 
-| ファイル | 内容 |
-|---|---|
-| `frontend-spec.md` | 仕様の source of truth（Notion ミラー） |
-| `product-requirements.md` | PRD |
-| `architecture.md` | アーキテクチャ設計 |
-| `functional-design.md` | 機能設計 |
-| `repository-structure.md` | 本ドキュメント |
-| `development-guidelines.md` | 開発ガイドライン |
-| `glossary.md` | 用語集 |
-| `adr/` | 設計決定記録（ADR-0001〜0005） |
-| `mentor-fb-day2.md` | メンターFB 準備 |
-| `business/` | インセプションデッキ・リーンキャンバス |
+| ファイル                    | 内容                                    |
+| --------------------------- | --------------------------------------- |
+| `frontend-spec.md`          | 仕様の source of truth（Notion ミラー） |
+| `product-requirements.md`   | PRD                                     |
+| `architecture.md`           | アーキテクチャ設計                      |
+| `functional-design.md`      | 機能設計                                |
+| `repository-structure.md`   | 本ドキュメント                          |
+| `development-guidelines.md` | 開発ガイドライン                        |
+| `glossary.md`               | 用語集                                  |
+| `adr/`                      | 設計決定記録（ADR-0001〜0005）          |
+| `mentor-fb-day2.md`         | メンターFB 準備                         |
+| `business/`                 | インセプションデッキ・リーンキャンバス  |

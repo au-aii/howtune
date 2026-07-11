@@ -17,10 +17,10 @@ final class HowCardRepliesViewModel: ObservableObject {
         normalizedDraft != nil && !isPosting
     }
 
-    init(post: FeedPost, api: FirebaseAPI = .shared) {
+    init(post: FeedPost, api: FirebaseAPI? = nil) {
         self.post = post
         self.replyCount = post.commentCount
-        self.api = api
+        self.api = api ?? .shared
     }
 
     func load() async {

@@ -23,10 +23,10 @@ struct HowCardRepliesView: View {
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
                 }
-                Divider().overlay(Color.white.opacity(0.08))
+                Divider().overlay(Color(.separator))
                 composer
             }
-            .background(Color.black.ignoresSafeArea())
+            .background(Color(.systemBackground).ignoresSafeArea())
             .navigationTitle("返信")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -58,24 +58,24 @@ struct HowCardRepliesView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(post.userName)
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color(.label))
                     Text("\(post.song.title) · \(formatRange(start: post.howCardComment?.songStart ?? 0, end: post.howCardComment?.songEnd ?? 0))")
                         .font(.caption)
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(Color(.secondaryLabel))
                 }
                 Spacer()
                 Label("\(viewModel.replyCount)", systemImage: "bubble.left.fill")
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.85))
+                    .foregroundStyle(Color(.secondaryLabel))
             }
 
             Text(post.comment)
                 .font(.subheadline)
-                .foregroundStyle(Color.white.opacity(0.9))
+                .foregroundStyle(Color(.label))
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(14)
-        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
     }
 
     @ViewBuilder
@@ -107,10 +107,10 @@ struct HowCardRepliesView: View {
         VStack(spacing: 10) {
             Image(systemName: "bubble.left.and.bubble.right")
                 .font(.title2)
-                .foregroundStyle(.gray)
+                .foregroundStyle(Color(.secondaryLabel))
             Text("まだ返信はありません")
                 .font(.subheadline)
-                .foregroundStyle(.gray)
+                .foregroundStyle(Color(.secondaryLabel))
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 28)
@@ -121,11 +121,11 @@ struct HowCardRepliesView: View {
             ZStack(alignment: .topLeading) {
                 TextEditor(text: $viewModel.draft)
                     .font(.subheadline)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.label))
                     .scrollContentBackground(.hidden)
                     .frame(minHeight: 72, maxHeight: 104)
                     .padding(8)
-                    .background(Color.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 10))
+                    .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
                     .onChange(of: viewModel.draft) { _, newValue in
                         if newValue.count > 180 {
                             viewModel.draft = String(newValue.prefix(180))
@@ -135,7 +135,7 @@ struct HowCardRepliesView: View {
                 if viewModel.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     Text("この聴き方に返信する")
                         .font(.subheadline)
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(Color(.secondaryLabel))
                         .padding(.horizontal, 14)
                         .padding(.vertical, 16)
                         .allowsHitTesting(false)
@@ -145,7 +145,7 @@ struct HowCardRepliesView: View {
             HStack {
                 Text("\(viewModel.draft.count)/180")
                     .font(.caption2.monospacedDigit())
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
                 Spacer()
                 Button {
                     Task {
@@ -170,7 +170,7 @@ struct HowCardRepliesView: View {
             }
         }
         .padding(14)
-        .background(Color.black)
+        .background(Color(.systemBackground))
     }
 
     private func formatRange(start: TimeInterval, end: TimeInterval) -> String {

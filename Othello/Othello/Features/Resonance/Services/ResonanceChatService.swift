@@ -78,13 +78,15 @@ final class ResonanceChatService: ObservableObject {
             "text": trimmed,
             "created_at": FieldValue.serverTimestamp()
         ]) { [weak self] error in
-            guard let self else { return }
             if let error {
                 print("[ResonanceChatService] send error: \(error.localizedDescription)")
                 return
             }
-            if let idx = self.messages.firstIndex(where: { $0.id == localId }) {
-                self.messages[idx].isPending = false
+            guard let self else { return }
+            Task { @MainActor in
+                if let idx = self.messages.firstIndex(where: { $0.id == localId }) {
+                    self.messages[idx].isPending = false
+                }
             }
         }
     }

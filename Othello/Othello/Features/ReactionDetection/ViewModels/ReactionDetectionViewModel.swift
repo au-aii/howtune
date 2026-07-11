@@ -19,10 +19,10 @@ final class ReactionDetectionViewModel: ObservableObject {
 
     init(
         classifier: OthelloActivityClassifierService? = nil,
-        extractor: ReactionFeatureExtractor = ReactionFeatureExtractor()
+        extractor: ReactionFeatureExtractor? = nil
     ) {
         self.classifier = classifier ?? OthelloActivityClassifierService()
-        self.extractor = extractor
+        self.extractor = extractor ?? ReactionFeatureExtractor()
         self.classifierStatus = self.classifier.isAvailable ? "Create ML有効" : "Create ML未検出"
     }
 

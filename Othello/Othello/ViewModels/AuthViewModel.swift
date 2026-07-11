@@ -8,6 +8,9 @@ final class AuthViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
 
+    /// 現在ログイン中ユーザーのメール（設定画面の表示用）。
+    var userEmail: String? { Auth.auth().currentUser?.email }
+
     private var authStateHandler: AuthStateDidChangeListenerHandle?
 
     init() {

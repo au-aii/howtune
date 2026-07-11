@@ -13,20 +13,20 @@ struct LiveReactionScoreCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("リアルタイム反応")
                         .font(.headline)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color(.label))
                     Text(statusText)
                         .font(.caption)
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(Color(.secondaryLabel))
                 }
 
                 Spacer()
 
                 Text("\(eventCount)区間")
                     .font(.caption.bold())
-                    .foregroundStyle(Color(red: 1.0, green: 0.3, blue: 0.3))
+                    .foregroundStyle(HowTuneDesign.accent)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Color.white.opacity(0.08), in: Capsule())
+                    .background(Color(.secondarySystemBackground), in: Capsule())
             }
 
             VStack(spacing: 10) {
@@ -36,10 +36,10 @@ struct LiveReactionScoreCard: View {
             }
         }
         .padding(14)
-        .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 8))
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                .stroke(Color(.separator), lineWidth: 1)
         )
         .padding(.horizontal, 20)
         .padding(.top, 12)

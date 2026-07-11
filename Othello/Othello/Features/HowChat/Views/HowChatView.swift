@@ -14,12 +14,12 @@ struct HowChatView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color(.systemBackground).ignoresSafeArea()
                 VStack(spacing: 0) {
                     reactionHeader(event: vm.event)
-                    Divider().overlay(Color.white.opacity(0.08))
+                    Divider().overlay(Color(.separator))
                     messageList
-                    Divider().overlay(Color.white.opacity(0.08))
+                    Divider().overlay(Color(.separator))
                     inputArea
                 }
             }
@@ -29,7 +29,7 @@ struct HowChatView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("閉じる") { dismiss() }
-                        .foregroundStyle(Color(red: 1.0, green: 0.3, blue: 0.3))
+                        .foregroundStyle(HowTuneDesign.accent)
                 }
             }
             .navigationDestination(isPresented: $navigateToHowCard) {
@@ -72,12 +72,12 @@ struct HowChatView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(formatTime(event.startTime))
                         .font(.caption.monospacedDigit().bold())
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(Color(.secondaryLabel))
 
                     if let lyric = event.lyricLine {
                         Text(lyric)
                             .font(.subheadline.bold())
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color(.label))
                             .lineLimit(2)
                     }
 
@@ -107,16 +107,16 @@ struct HowChatView: View {
                     .foregroundStyle(event.heartRateTrend.color)
                 Text("心拍 \(event.heartRateTrend.label)")
                     .font(.caption)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
                 Spacer()
                 Text("強度 \(Int(event.intensity * 100))%")
                     .font(.caption.monospacedDigit())
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 10)
         }
-        .background(Color.white.opacity(0.03))
+        .background(Color(.secondarySystemBackground))
     }
 
     // MARK: - 強度バー
@@ -124,7 +124,7 @@ struct HowChatView: View {
     private func intensityBar(value: Double, color: Color) -> some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                Capsule().fill(Color.white.opacity(0.1)).frame(height: 4)
+                Capsule().fill(Color(.secondarySystemBackground)).frame(height: 4)
                 Capsule().fill(color).frame(width: geo.size.width * value, height: 4)
             }
         }
@@ -163,14 +163,14 @@ struct HowChatView: View {
             if msg.sender == .ai {
                 Image(systemName: "sparkles")
                     .font(.caption)
-                    .foregroundStyle(Color(red: 1.0, green: 0.3, blue: 0.3))
+                    .foregroundStyle(HowTuneDesign.accent)
                     .frame(width: 20)
                 Text(msg.text)
                     .font(.subheadline)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.label))
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
-                    .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Spacer(minLength: 40)
             } else {
@@ -180,7 +180,7 @@ struct HowChatView: View {
                     .foregroundStyle(.white)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
-                    .background(Color(red: 1.0, green: 0.3, blue: 0.3).opacity(0.85), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .background(HowTuneDesign.accent.opacity(0.85), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
         }
         .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -191,19 +191,19 @@ struct HowChatView: View {
         HStack(spacing: 8) {
             Image(systemName: "sparkles")
                 .font(.caption)
-                .foregroundStyle(Color(red: 1.0, green: 0.3, blue: 0.3))
+                .foregroundStyle(HowTuneDesign.accent)
                 .frame(width: 20)
             HStack(spacing: 4) {
                 ForEach(0..<3, id: \.self) { i in
                     Circle()
-                        .fill(Color.gray)
+                        .fill(Color(.secondaryLabel))
                         .frame(width: 6, height: 6)
                         .opacity(vm.state == .loading ? 1 : 0.3)
                         .animation(.easeInOut(duration: 0.5).repeatForever().delay(Double(i) * 0.15), value: vm.state)
                 }
             }
             .padding(.horizontal, 14).padding(.vertical, 10)
-            .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             Spacer()
         }
     }
@@ -223,7 +223,7 @@ struct HowChatView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(Color.black)
+            .background(Color(.systemBackground))
         }
     }
 
@@ -236,10 +236,10 @@ struct HowChatView: View {
                     } label: {
                         Text(choice.label)
                             .font(.subheadline)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color(.label))
                             .padding(.horizontal, 14)
                             .padding(.vertical, 8)
-                            .background(Color.white.opacity(0.1), in: Capsule())
+                            .background(Color(.secondarySystemBackground), in: Capsule())
                             .overlay(Capsule().stroke(Color.white.opacity(0.2), lineWidth: 1))
                     }
                     .disabled(vm.state == .loading)
@@ -253,10 +253,10 @@ struct HowChatView: View {
         HStack(spacing: 10) {
             TextField("自由に入力…", text: $vm.freeInputText)
                 .font(.subheadline)
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(.label))
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-                .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 22))
+                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 22))
                 .focused($isInputFocused)
                 .submitLabel(.send)
                 .onSubmit { vm.submitFreeInput() }
@@ -271,7 +271,7 @@ struct HowChatView: View {
                     .foregroundStyle(
                         vm.freeInputText.isEmpty || vm.state == .loading
                             ? Color.gray.opacity(0.4)
-                            : Color(red: 1.0, green: 0.3, blue: 0.3)
+                            : HowTuneDesign.accent
                     )
             }
             .disabled(vm.freeInputText.isEmpty || vm.state == .loading)
@@ -283,10 +283,10 @@ struct HowChatView: View {
         VStack(spacing: 12) {
             HStack(spacing: 6) {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(Color(red: 1.0, green: 0.3, blue: 0.3))
+                    .foregroundStyle(HowTuneDesign.accent)
                 Text("気持ちを言語化できました")
                     .font(.caption)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
             }
 
             Button {
@@ -314,7 +314,7 @@ struct HowChatView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 16)
-        .background(Color.black)
+        .background(Color(.systemBackground))
         .transition(.opacity.combined(with: .move(edge: .bottom)))
     }
 

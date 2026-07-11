@@ -13,7 +13,7 @@ struct ClipCreationView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color(.systemBackground).ignoresSafeArea()
                 ScrollView {
                     VStack(spacing: 28) {
                         albumArt
@@ -36,14 +36,14 @@ struct ClipCreationView: View {
                     } label: {
                         Image(systemName: "chevron.left")
                             .font(.headline.weight(.semibold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color(.label))
                             .frame(width: 36, height: 36)
-                            .background(Color.white.opacity(0.12), in: Circle())
+                            .background(Color(.secondarySystemBackground), in: Circle())
                     }
                     .accessibilityLabel("戻る")
                 }
             }
-            .toolbarBackground(Color.black, for: .navigationBar)
+            .toolbarBackground(Color(.systemBackground), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .alert("投稿エラー", isPresented: postErrorBinding) {
                 Button("OK", role: .cancel) {}
@@ -66,10 +66,10 @@ struct ClipCreationView: View {
             Text(song.title)
                 .font(.title)
                 .fontWeight(.bold)
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(.label))
             Text(song.artistName)
                 .font(.subheadline)
-                .foregroundStyle(.gray)
+                .foregroundStyle(Color(.secondaryLabel))
         }
     }
 
@@ -96,25 +96,25 @@ struct ClipCreationView: View {
             HStack {
                 Text("コメント")
                     .font(.caption)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
                 Spacer()
                 Text("\(viewModel.commentText.count)/140")
                     .font(.caption.monospacedDigit())
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
             }
 
             ZStack(alignment: .topLeading) {
                 if viewModel.commentText.isEmpty {
                     Text("この曲のここが好き")
                         .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.32))
+                        .foregroundStyle(Color(.tertiaryLabel))
                         .padding(.horizontal, 14)
                         .padding(.vertical, 13)
                 }
 
                 TextEditor(text: $viewModel.commentText)
                     .font(.subheadline)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.label))
                     .scrollContentBackground(.hidden)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 8)
@@ -125,10 +125,10 @@ struct ClipCreationView: View {
                         }
                     }
             }
-            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
+            .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
-                    .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                    .stroke(Color(.separator), lineWidth: 1)
             )
 
             if viewModel.postedCardID != nil {

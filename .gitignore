@@ -17,6 +17,7 @@ Thumbs.db
 
 # Firebase
 **/serviceAccountKey.json
+.firebase/
 
 # Node
 node_modules/

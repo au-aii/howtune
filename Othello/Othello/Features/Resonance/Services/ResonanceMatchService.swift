@@ -13,7 +13,7 @@ final class ResonanceMatchService: ObservableObject {
     private let collectionName = "how-cards"
 
     /// 同地点判定のマージン（秒）。±2.5s で区間が重なれば同地点。
-    static let sameSpotMargin: TimeInterval = 2.5
+    nonisolated static let sameSpotMargin: TimeInterval = 2.5
 
     deinit { listener?.remove() }
 

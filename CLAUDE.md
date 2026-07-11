@@ -18,6 +18,13 @@ Engineer Guild Hackathon 2026/05 の Team 10 リポジトリ。
 - 作業ブランチ → PR → マージの流れを守る
 - ブランチ名は `feat/xxx` / `fix/xxx` / `docs/xxx` の形式
 
+## Node バージョン（重要・過去に繰り返しハマった）
+
+- **Node は 22（LTS）に固定**。`functions/package.json` と `web/package.json` の `volta` フィールドで pin 済み。
+- **Volta を使う**：一度 `volta setup` を実行して shim を PATH に通せば、`cd` するだけで自動的に 22 に切り替わる。以後 `node scripts/...` と普通に叩けばよい。
+- **⚠️ Homebrew の `node`（v26 等の bleeding-edge）で直接叩かない**。firebase-admin 同梱の node-fetch が gzip 解凍で壊れ（`ERR_STREAM_PREMATURE_CLOSE` / `oauth2.googleapis.com/token: Premature close`）、Firestore/Auth への読み書きが全滅する。ネットワークではなく Node バージョンが原因なので、まず `node --version` が 22 か確認する。
+- Volta 未導入の人向けに repo 直下 `.node-version`（22.23.1）も置いてある（fnm / nodenv / asdf 用）。
+
 ## コミット規約
 
 - prefix: `feat` / `fix` / `docs` / `refactor` / `chore` / `test`

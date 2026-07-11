@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HowTune 拡張アーキテクチャ — Web ダッシュボード作戦</title>
+<style>
+  :root {
+    --ground: #f3f4f7;
+    --surface: #ffffff;
+    --ink: #171b24;
+    --muted: #5c6472;
+    --faint: #8b93a1;
+    --border: #e1e4ea;
+    --border-strong: #cdd2db;
+
+    /* iOS（センサー収集・書き込み） */
+    --ios: #c0692a;
+    --ios-ink: #8f4a17;
+    --ios-bg: #fbf0e6;
+    --ios-border: #eccfb2;
+
+    /* Web（閲覧・可視化） */
+    --web: #227e75;
+    --web-ink: #175e57;
+    --web-bg: #e5f1ef;
+    --web-border: #b9dcd6;
+
+    /* Firebase（真実の源） */
+    --fb: #4a4f8f;
+    --fb-ink: #34386b;
+    --fb-bg: #ecedf6;
+    --fb-border: #c9cbe6;
+
+    /* 注意・匿名化 */
+    --warn: #b1442e;
+    --warn-bg: #fbe9e5;
+    --warn-border: #eec4ba;
+
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px 120px; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-size: clamp(30px, 5vw, 46px);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    font-weight: 800;
+    text-wrap: balance;
+    margin: 0 0 18px;
+  }
+  h2 {
+    font-size: clamp(21px, 3vw, 27px);
+    letter-spacing: -0.01em;
+    font-weight: 750;
+    margin: 0;
+    text-wrap: balance;
+  }
+  h3 { font-size: 16px; font-weight: 700; margin: 0 0 4px; }
+  p { margin: 0 0 14px; }
+  .lead { font-size: clamp(16px, 2.2vw, 19px); color: var(--muted); max-width: 64ch; }
+  code, .mono { font-family: var(--mono); }
+  :not(pre) > code {
+    font-size: 0.86em;
+    background: #eceef2;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 1px 5px;
+    color: #2c3444;
+    word-break: break-word;
+  }
+
+  header.hero {
+    padding: 80px 0 40px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 56px;
+  }
+  .meta-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 13px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    padding: 6px 14px;
+    margin-top: 24px;
+    color: var(--muted);
+  }
+  .meta-badge b { color: var(--ink); font-weight: 600; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #4caf7d; box-shadow: 0 0 0 3px #4caf7d22; }
+
+  section { margin-top: 64px; }
+  .sec-head { margin-bottom: 24px; }
+  .sec-head p { margin-top: 8px; color: var(--muted); max-width: 62ch; }
+
+  /* 3層図 */
+  .layers { display: flex; flex-direction: column; gap: 14px; }
+  .layer {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 20px;
+    border-radius: 14px;
+    padding: 20px 22px;
+    border: 1px solid;
+    align-items: center;
+  }
+  .layer.ios { background: var(--ios-bg); border-color: var(--ios-border); }
+  .layer.fb  { background: var(--fb-bg);  border-color: var(--fb-border); }
+  .layer.web { background: var(--web-bg); border-color: var(--web-border); }
+  .layer .l-title { font-size: 18px; font-weight: 800; margin: 0 0 2px; }
+  .layer.ios .l-title { color: var(--ios-ink); }
+  .layer.fb  .l-title { color: var(--fb-ink); }
+  .layer.web .l-title { color: var(--web-ink); }
+  .layer .l-role { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin: 0; }
+  .layer.ios .l-role { color: var(--ios); }
+  .layer.fb  .l-role { color: var(--fb); }
+  .layer.web .l-role { color: var(--web); }
+  .layer .l-desc { font-size: 14px; color: var(--muted); margin: 8px 0 0; }
+  .layer .l-desc b { color: var(--ink); }
+  .layer .l-tech { font-family: var(--mono); font-size: 12px; margin-top: 8px; color: var(--ink); }
+  .flow-arrows { display: flex; justify-content: center; gap: 60px; padding: 4px 0; color: var(--faint); font-family: var(--mono); font-size: 12px; }
+  .flow-arrows span { display: flex; flex-direction: column; align-items: center; }
+
+  /* 2つの顔 */
+  .faces { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .face {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    border-top: 3px solid var(--web);
+  }
+  .face.b2b { border-top-color: var(--fb); }
+  .face .f-tag { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin: 0 0 8px; }
+  .face h3 { font-size: 18px; margin-bottom: 10px; }
+  .face ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 14px; }
+  .face li { margin-bottom: 6px; }
+  .face .path { font-family: var(--mono); font-size: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border); color: var(--ink); }
+
+  /* ロードmap */
+  .phases { display: flex; flex-direction: column; gap: 0; }
+  .phase {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    gap: 18px;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .phase:last-child { border-bottom: none; }
+  .phase .p-num {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--fb);
+    background: var(--fb-bg);
+    border: 1px solid var(--fb-border);
+    border-radius: 10px;
+    width: 52px; height: 52px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    line-height: 1.1;
+    text-align: center;
+  }
+  .phase .p-num small { font-size: 9px; color: var(--faint); font-weight: 400; }
+  .phase h3 { font-size: 17px; margin-bottom: 6px; }
+  .phase .p-goal { font-size: 13px; color: var(--web-ink); font-family: var(--mono); margin-bottom: 10px; }
+  .phase ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 14px; }
+  .phase li { margin-bottom: 5px; }
+  .phase li b { color: var(--ink); }
+  .phase .badge-new { display: inline-block; font-family: var(--mono); font-size: 10px; background: var(--ios-bg); color: var(--ios-ink); border: 1px solid var(--ios-border); border-radius: 5px; padding: 0 5px; margin-left: 4px; }
+
+  /* 匿名化パイプライン */
+  .pipeline-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    overflow-x: auto;
+  }
+  .pipe-row { display: flex; align-items: stretch; gap: 0; min-width: max-content; }
+  .pipe-node {
+    border-radius: 10px;
+    padding: 14px 16px;
+    min-width: 170px;
+    max-width: 220px;
+    border: 1px solid var(--border-strong);
+    background: #fbfbfd;
+  }
+  .pipe-node.raw { border-color: var(--ios-border); background: var(--ios-bg); }
+  .pipe-node.agg { border-color: var(--fb-border); background: var(--fb-bg); }
+  .pipe-node.pub { border-color: var(--web-border); background: var(--web-bg); }
+  .pipe-node .pn-t { font-size: 13px; font-weight: 700; margin: 0; }
+  .pipe-node .pn-s { font-family: var(--mono); font-size: 11px; color: var(--muted); margin: 4px 0 0; line-height: 1.4; }
+  .pipe-arrow { align-self: center; padding: 0 10px; min-width: 96px; text-align: center; }
+  .pipe-arrow .pa-l { font-family: var(--mono); font-size: 10.5px; color: var(--muted); display: block; margin-bottom: 3px; line-height: 1.3; }
+  .pipe-arrow .pa-a { font-size: 20px; color: var(--fb); }
+
+  .guard {
+    margin-top: 18px;
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    font-size: 14px;
+    color: var(--warn);
+  }
+  .guard b { font-weight: 700; }
+
+  /* 発見カード */
+  .finding {
+    background: var(--ios-bg);
+    border: 1px solid var(--ios-border);
+    border-radius: 14px;
+    padding: 22px 24px;
+  }
+  .finding h3 { color: var(--ios-ink); font-size: 17px; margin-bottom: 8px; }
+  .finding p { color: var(--ios-ink); margin: 0 0 8px; font-size: 14.5px; }
+  .finding code { background: #f6e6d6; border-color: var(--ios-border); color: var(--ios-ink); }
+
+  /* 原則 */
+  .principles { display: flex; flex-direction: column; gap: 12px; }
+  .principle {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    align-items: start;
+  }
+  .principle .pr-n { font-family: var(--mono); font-weight: 700; font-size: 18px; color: var(--web); }
+  .principle p { margin: 0; font-size: 14.5px; color: var(--muted); }
+  .principle p b { color: var(--ink); }
+
+  /* 技術表 */
+  .stack { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .stack th, .stack td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .stack th { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+  .stack td.k { font-family: var(--mono); font-size: 12.5px; color: var(--ink); white-space: nowrap; }
+  .stack tr td:last-child { color: var(--muted); }
+  .stack-scroll { overflow-x: auto; }
+
+  .takeaway {
+    background: var(--ink);
+    color: #eceef3;
+    border-radius: 16px;
+    padding: 32px 30px;
+    margin-top: 64px;
+  }
+  .takeaway h2 { color: #fff; margin-bottom: 18px; }
+  .takeaway ol { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 12px; }
+  .takeaway li { font-size: 15px; color: #c9cdd8; padding-left: 4px; }
+  .takeaway li b { color: #fff; }
+  .takeaway code { background: #262b36; border-color: #333a48; color: #cfd4de; }
+
+  footer.doc-foot { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-family: var(--mono); font-size: 12px; color: var(--faint); }
+
+  @media (max-width: 720px) {
+    .faces { grid-template-columns: 1fr; }
+    .layer { grid-template-columns: 1fr; gap: 10px; }
+    .flow-arrows { gap: 30px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .layer, .face, .principle { transition: transform 0.2s ease; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">HowTune · 設計作戦 · 2026-07</p>
+    <h1>Web ダッシュボードを<br>足すための作戦</h1>
+    <p class="lead">iOS は AirPods のヘッドトラッキングという独自性のためネイティブのまま。その上に、リスナー本人と B2B（アーティスト/レーベル）の両方が見られる Web ダッシュボードをどう足すか。既存 Firebase を壊さずに拡張する段階プラン。</p>
+    <span class="meta-badge">
+      <span class="dot"></span>
+      対象 <b>本人向け ＋ B2B インサイト</b> · 方式 <b>既存 Firebase を単一の真実の源に</b>
+    </span>
+  </header>
+
+  <!-- 大原則 -->
+  <section id="principle">
+    <div class="sec-head">
+      <p class="eyebrow">00 — 大原則</p>
+      <h2>Firebase を単一の真実の源にして、Web は"窓"を足すだけ</h2>
+      <p>バックエンドは作り直さない。iOS も Web も同じ Firebase を見る。センサーを扱う iOS が「収集する側」、Web が「読んで見せる側」。責務がぶつからないのがこの形の強み。</p>
+    </div>
+    <div class="layers">
+      <div class="layer ios">
+        <div>
+          <p class="l-role">Collect / Write</p>
+          <p class="l-title">📱 iOS ネイティブ</p>
+        </div>
+        <div>
+          <p class="l-desc"><b>AirPods 頭の動き ＋ 心拍 ＋ Apple Music 同期</b>でリアクションを検出・記録する側。センサーは iOS でしか取れない＝<b>独自性の源泉</b>。ここは絶対に動かさない。</p>
+          <p class="l-tech">CMHeadphoneMotionManager · MusicKit · Firebase iOS SDK</p>
+        </div>
+      </div>
+      <div class="flow-arrows"><span>↓ 書き込み（Functions 経由）<br>↑</span></div>
+      <div class="layer fb">
+        <div>
+          <p class="l-role">Source of Truth</p>
+          <p class="l-title">🔥 Firebase</p>
+        </div>
+        <div>
+          <p class="l-desc"><b>データの保管・集計。真実の源。</b>iOS と Web の両クライアント共通。既にある資産（Auth / Firestore / Functions, <code>howtune-74252</code>）をそのまま使う。</p>
+          <p class="l-tech">Auth · Firestore · Cloud Functions · Hosting（asia-northeast1）</p>
+        </div>
+      </div>
+      <div class="flow-arrows"><span>↓ 読み取り（直読み＋集計API）<br>↑</span></div>
+      <div class="layer web">
+        <div>
+          <p class="l-role">Read / Visualize</p>
+          <p class="l-title">🖥️ Web ダッシュボード</p>
+        </div>
+        <div>
+          <p class="l-desc">Firebase のデータを<b>読んで可視化するだけ</b>の側。センサーは扱わない。閲覧・分析に最適化。本人向けと B2B の2つの顔を持つ。</p>
+          <p class="l-tech">Next.js · Firebase JS SDK · Firebase Hosting</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2つの顔 -->
+  <section id="faces">
+    <div class="sec-head">
+      <p class="eyebrow">01 — Web の2つの顔</p>
+      <h2>同じデータ源から、2種類の見せ方</h2>
+      <p>本人向けは「生の自分のデータを直読み」、B2B は「匿名集計された結果だけを見せる」。ここを分けるのが設計の核。</p>
+    </div>
+    <div class="faces">
+      <div class="face">
+        <p class="f-tag">Face A — リスナー本人</p>
+        <h3>自分の振り返り</h3>
+        <ul>
+          <li>自分がどの曲でどう反応したか</li>
+          <li>反応履歴・心拍トレンド・お気に入り曲</li>
+          <li>iOS と<b>同じアカウント</b>でログイン</li>
+        </ul>
+        <p class="path">Firestore 直読み<br>rules: 本人のみ read</p>
+      </div>
+      <div class="face b2b">
+        <p class="f-tag">Face B — アーティスト / レーベル</p>
+        <h3>B2B インサイト</h3>
+        <ul>
+          <li>「楽曲のどこで聴衆が沸いたか」</li>
+          <li>時間軸の反応密度ヒートマップ・タグ分布</li>
+          <li>自分の曲の<b>集計結果だけ</b>を閲覧</li>
+        </ul>
+        <p class="path">集計API（Functions）経由<br>匿名化済み song_insights のみ</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ロードマップ -->
+  <section id="roadmap">
+    <div class="sec-head">
+      <p class="eyebrow">02 — 段階ロードマップ</p>
+      <h2>小さく出して、集計レイヤーを足して、B2B へ育てる</h2>
+      <p>いきなり全部作らない。本人向けを最小で出し、その裏に集計を足し、最後に B2B 画面を載せる順。</p>
+    </div>
+    <div class="phases">
+      <div class="phase">
+        <div class="p-num">P1<small>本人向け</small></div>
+        <div>
+          <h3>本人ダッシュボード（最小・すぐ出せる）</h3>
+          <p class="p-goal">GOAL: 自分の反応を Web で見られる状態</p>
+          <ul>
+            <li><b>Firebase Hosting</b> に Next.js を立てる</li>
+            <li><b>Firebase Auth</b> で iOS と同じアカウントでログイン</li>
+            <li>自分の <code>how-cards</code> を <b>Firestore 直読み</b>で可視化</li>
+            <li><code>firestore.rules</code> は「本人のみ read」で既存の延長</li>
+          </ul>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="p-num">P2<small>集計</small></div>
+        <div>
+          <h3>集計レイヤー（B2B の土台）</h3>
+          <p class="p-goal">GOAL: 曲ごとの匿名インサイトを前計算</p>
+          <ul>
+            <li><b>Cloud Functions</b> で曲ごとの反応を集計 → <code>song_insights/{songId}</code> に保存</li>
+            <li>中身：時間軸の<b>反応密度ヒートマップ</b>・タグ分布・リスナー数</li>
+            <li>トリガー：how-card 作成時 or 定期バッチ</li>
+            <li>⚠️ <b>匿名化必須</b>：<code>user_id</code> を含めない／最小人数（例 5人）未満は出さない</li>
+          </ul>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="p-num">P3<small>B2B</small></div>
+        <div>
+          <h3>B2B インサイト画面 ＋ 精緻化</h3>
+          <p class="p-goal">GOAL: アーティストが自分の曲の反応を見られる</p>
+          <ul>
+            <li>アーティスト認証と<b>曲の所有権</b>（自分の曲の <code>song_insights</code> のみ read）</li>
+            <li>ヒートマップ可視化（「サビの 1:12 で反応集中」）</li>
+            <li>iOS の自動検出リアクションを保存する API を追加<span class="badge-new">新規</span>し、秒単位で精緻化</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 匿名集計パイプライン -->
+  <section id="anon">
+    <div class="sec-head">
+      <p class="eyebrow">03 — B2B の肝</p>
+      <h2>生データは絶対にアーティストに渡さない</h2>
+      <p>個人の反応をそのまま見せると、誰がどう反応したかが特定されうる。必ず Functions で集計・匿名化した層だけを公開する。</p>
+    </div>
+    <div class="pipeline-box">
+      <div class="pipe-row">
+        <div class="pipe-node raw">
+          <p class="pn-t">生の反応</p>
+          <p class="pn-s">how-cards<br>user_id 付き<br>（本人のみ read）</p>
+        </div>
+        <div class="pipe-arrow">
+          <span class="pa-l">Functions で<br>曲ごとに集約</span>
+          <span class="pa-a">→</span>
+        </div>
+        <div class="pipe-node agg">
+          <p class="pn-t">匿名集計</p>
+          <p class="pn-s">song_insights/{songId}<br>user_id 無し<br>密度・タグ・人数のみ</p>
+        </div>
+        <div class="pipe-arrow">
+          <span class="pa-l">所有アーティストへ<br>read 許可</span>
+          <span class="pa-a">→</span>
+        </div>
+        <div class="pipe-node pub">
+          <p class="pn-t">B2B 画面</p>
+          <p class="pn-s">ヒートマップ<br>タグ分布<br>（自分の曲のみ）</p>
+        </div>
+      </div>
+      <div class="guard">
+        🔒 <b>k-匿名性</b>：ある曲・ある区間の反応が<b>最小人数（例：5人）未満なら表示しない</b>。<code>song_insights</code> には <code>user_id</code> を一切含めず、集計値（人数・密度・タグ比率）だけを持たせる。
+      </div>
+    </div>
+  </section>
+
+  <!-- 重要な発見 -->
+  <section id="finding">
+    <div class="sec-head">
+      <p class="eyebrow">04 — 効く発見</p>
+      <h2>既存の how-cards が、もう B2B の素材になっている</h2>
+    </div>
+    <div class="finding">
+      <h3>新しいデータを作らずに B2B 第一版が始められる</h3>
+      <p><code>how-cards</code> は既に <code>song_id</code> ＋ <code>song_start</code>/<code>song_end</code> ＋ <code>tags</code> ＋ <code>user_id</code> を持っている。これは「<b>曲のこの区間で、この人が、こう反応した</b>」という記録そのもの。曲ごとに集計すれば「どこで沸いたか」が出せる。</p>
+      <p>一方、AirPods の<b>自動検出リアクション</b>（<code>ReactionEvent</code>）は現状 iOS のメモリ上だけで <b>Firestore に未保存</b>（FirebaseAPI に保存メソッドが無い）。ここを保存すれば、秒単位のもっと細かい盛り上がりが取れる → Phase 3 の精緻化で追加する。</p>
+    </div>
+  </section>
+
+  <!-- 貫く原則 -->
+  <section id="rules">
+    <div class="sec-head">
+      <p class="eyebrow">05 — 貫く設計原則</p>
+      <h2>ここだけは外さない 3 つ</h2>
+    </div>
+    <div class="principles">
+      <div class="principle">
+        <div class="pr-n">1</div>
+        <p><b>B2B には生データを渡さない。</b> アーティストが見るのは、Functions で集計・匿名化した <code>song_insights</code> だけ。個人の反応は特定されない。</p>
+      </div>
+      <div class="principle">
+        <div class="pr-n">2</div>
+        <p><b>書き込みは Functions、読み取りは Web 直読み。</b> 既存の「2経路」の延長。本人ダッシュボードは直読み、B2B は集計 API。</p>
+      </div>
+      <div class="principle">
+        <div class="pr-n">3</div>
+        <p><b>iOS＝センサー主体 / Web＝閲覧主体</b>で責務を分け、Firebase を共通の真実の源にする。バックエンドの二重実装を避ける。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 技術スタック -->
+  <section id="stack">
+    <div class="sec-head">
+      <p class="eyebrow">06 — 技術スタック</p>
+      <h2>既存資産に足すもの</h2>
+    </div>
+    <div class="stack-scroll">
+      <table class="stack">
+        <thead><tr><th>層</th><th>採用</th><th>備考</th></tr></thead>
+        <tbody>
+          <tr><td class="k">ホスティング</td><td>Firebase Hosting</td><td>同じ <code>howtune-74252</code> 内で完結。<code>firebase deploy</code> 一発</td></tr>
+          <tr><td class="k">Web フロント</td><td>Next.js ＋ 可視化ライブラリ</td><td>ヒートマップ/チャートは Recharts や visx。SSR/SPA どちらも可</td></tr>
+          <tr><td class="k">認証</td><td>Firebase Auth（Web SDK）</td><td>iOS と同じアカウント体系を共有</td></tr>
+          <tr><td class="k">データ読み取り</td><td>Firebase JS SDK（Firestore）</td><td>本人向けは直読み。rules で制御</td></tr>
+          <tr><td class="k">集計</td><td>Cloud Functions（既存 <code>api</code> 拡張）</td><td>song_insights の前計算。トリガー or スケジュール</td></tr>
+          <tr><td class="k">新規コレクション</td><td><code>song_insights/{songId}</code></td><td>匿名集計結果。<br>（将来）<code>reactions</code> で秒単位の生反応も保存</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- まとめ -->
+  <div class="takeaway">
+    <h2>次の一手（この作戦の実行順）</h2>
+    <ol>
+      <li><b>Phase 1 を最小で立てる</b> — Firebase Hosting に Next.js、Auth でログイン、自分の <code>how-cards</code> を直読みで表示。ここまでで「Web で自分の反応が見える」を達成。</li>
+      <li><b>Phase 2 の集計を how-cards ベースで書く</b> — 新データ不要。Functions で <code>song_insights</code> を作り、匿名化（k-匿名性）を最初から入れる。</li>
+      <li><b>Phase 3 で B2B 画面と生反応保存を足す</b> — アーティスト所有権とヒートマップ、そして <code>ReactionEvent</code> の Firestore 保存で秒単位に精緻化。</li>
+    </ol>
+  </div>
+
+  <footer class="doc-foot">
+    docs/web-dashboard-architecture.html · HowTune 設計作戦 · 既存構成の詳細は docs/architecture.md / data-model.md を参照
+  </footer>
+
+</div>
+</body>
+</html>

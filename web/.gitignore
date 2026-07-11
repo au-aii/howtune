@@ -1,0 +1,9 @@
+/node_modules
+/.next
+/out
+/build
+
+# 環境変数（実値。公開値だが慣習に従い gitignore）
+.env.local
+
+*.tsbuildinfo

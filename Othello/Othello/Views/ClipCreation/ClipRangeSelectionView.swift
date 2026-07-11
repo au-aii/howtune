@@ -15,11 +15,11 @@ struct ClipRangeSelectionView: View {
             HStack {
                 Text("好きな部分を選ぶ")
                     .font(.caption)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
                 Spacer()
                 Text("\(clipStartFormatted) – \(clipEndFormatted)")
                     .font(.caption.monospacedDigit())
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
             }
 
             ClipRangeWaveformView(
@@ -38,7 +38,7 @@ struct ClipRangeSelectionView: View {
                     .foregroundStyle(Color(red: 0.75, green: 0.62, blue: 1.0))
                 Text("選択中")
                     .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
                 Spacer()
                 Text("\(clipDurationSeconds)s")
                     .font(.caption2)

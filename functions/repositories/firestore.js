@@ -1,11 +1,24 @@
-const admin = require('firebase-admin');
-const { isMusicKitSongId, normalizeMusicKitSongId } = require('../utils/musicKit');
+const admin = require("firebase-admin");
+const {
+  isMusicKitSongId,
+  normalizeMusicKitSongId,
+} = require("../utils/musicKit");
 
 const db = () => admin.firestore();
 const { FieldValue } = admin.firestore;
 
-async function createHowCard({ uid, comment, songStart, songEnd, songId, artistId, itunesId, songSlug }) {
-  const ref = db().collection('how-cards').doc();
+async function createHowCard({
+  uid,
+  comment,
+  songStart,
+  songEnd,
+  songId,
+  artistId,
+  itunesId,
+  songSlug,
+  tags = [],
+}) {
+  const ref = db().collection("how-cards").doc();
   const data = {
     comment,
     song_start: songStart,
@@ -15,6 +28,7 @@ async function createHowCard({ uid, comment, songStart, songEnd, songId, artistI
     artist_id: artistId,
     user_id: uid,
     likes: 0,
+    tags: Array.isArray(tags) ? tags : [],
     created_at: FieldValue.serverTimestamp(),
   };
 
@@ -24,20 +38,58 @@ async function createHowCard({ uid, comment, songStart, songEnd, songId, artistI
   return serializeHowCard(ref.id, { ...data, created_at: null });
 }
 
+// 反応セッション（moat P-a）: 本人の user_id で保存。B2B へは Functions 集計・匿名化のみ。
+async function createReactionSession({
+  uid,
+  songId,
+  songTitle,
+  artistId,
+  artistName,
+  durationSec,
+  consentVersion,
+  events,
+  selfReportTags,
+}) {
+  const now = FieldValue.serverTimestamp();
+  const ref = db().collection("reaction_sessions").doc();
+  await ref.set({
+    user_id: uid,
+    song_id: songId,
+    song_title: songTitle ?? null,
+    artist_id: artistId ?? null,
+    artist_name: artistName ?? null,
+    duration_sec: durationSec ?? null,
+    consent_version: consentVersion ?? "v1",
+    events: Array.isArray(events) ? events : [],
+    // 弱教師ラベル（ユーザーが選んだ How タグ）＝将来の ML 学習用
+    self_report: { tags: Array.isArray(selfReportTags) ? selfReportTags : [] },
+    recorded_at: now,
+    created_at: now,
+  });
+  return { id: ref.id };
+}
+
 async function getHowCards({ songId, limit = 50 } = {}) {
-  const collection = db().collection('how-cards');
+  const collection = db().collection("how-cards");
 
   if (songId) {
-    const queries = [collection.where('song_id', '==', songId).limit(limit).get()];
+    const queries = [
+      collection.where("song_id", "==", songId).limit(limit).get(),
+    ];
     if (isMusicKitSongId(songId)) {
-      queries.push(collection.where('itunes_id', '==', songId).limit(limit).get());
+      queries.push(
+        collection.where("itunes_id", "==", songId).limit(limit).get(),
+      );
     }
 
     const snapshots = await Promise.all(queries);
-    return serializeHowCardDocs(snapshots.flatMap(snapshot => snapshot.docs), limit);
+    return serializeHowCardDocs(
+      snapshots.flatMap((snapshot) => snapshot.docs),
+      limit,
+    );
   }
 
-  const query = collection.orderBy('created_at', 'desc');
+  const query = collection.orderBy("created_at", "desc");
   const snapshot = await query.limit(limit).get();
   return serializeHowCardDocs(snapshot.docs, limit);
 }
@@ -51,16 +103,18 @@ async function serializeHowCardDocs(docs, limit) {
   }
 
   const howCards = [...docsById.values()]
-    .map(doc => serializeHowCard(doc.id, doc.data()))
+    .map((doc) => serializeHowCard(doc.id, doc.data()))
     .filter(Boolean)
-    .sort((a, b) => timestampMillis(b.created_at) - timestampMillis(a.created_at))
+    .sort(
+      (a, b) => timestampMillis(b.created_at) - timestampMillis(a.created_at),
+    )
     .slice(0, limit);
 
   return attachUserNames(howCards);
 }
 
 async function getHowCard(cardId) {
-  const doc = await db().collection('how-cards').doc(cardId).get();
+  const doc = await db().collection("how-cards").doc(cardId).get();
   if (!doc.exists) return null;
   return attachUserName(serializeHowCard(doc.id, doc.data()));
 }
@@ -68,10 +122,10 @@ async function getHowCard(cardId) {
 async function getRecommendedHowCards({ limit = 12 } = {}) {
   const safeLimit = clampLimit(limit, 1, 50);
   const sampleLimit = Math.min(100, Math.max(safeLimit * 4, 24));
-  const collection = db().collection('how-cards');
+  const collection = db().collection("how-cards");
   const [recentSnapshot, likedSnapshot] = await Promise.all([
-    collection.orderBy('created_at', 'desc').limit(sampleLimit).get(),
-    collection.orderBy('likes', 'desc').limit(sampleLimit).get(),
+    collection.orderBy("created_at", "desc").limit(sampleLimit).get(),
+    collection.orderBy("likes", "desc").limit(sampleLimit).get(),
   ]);
 
   const candidates = new Map();
@@ -90,32 +144,32 @@ async function getRecommendedHowCards({ limit = 12 } = {}) {
 }
 
 async function getHowCardReplies({ cardId, limit = 50 } = {}) {
-  const cardRef = db().collection('how-cards').doc(cardId);
+  const cardRef = db().collection("how-cards").doc(cardId);
   const cardDoc = await cardRef.get();
   if (!cardDoc.exists || !isHowCardComment(cardDoc.data())) return null;
 
   const snapshot = await cardRef
-    .collection('replies')
-    .orderBy('created_at', 'asc')
+    .collection("replies")
+    .orderBy("created_at", "asc")
     .limit(clampLimit(limit, 1, 100))
     .get();
 
   const replies = snapshot.docs
-    .map(doc => serializeHowCardReply(doc.id, cardId, doc.data()))
+    .map((doc) => serializeHowCardReply(doc.id, cardId, doc.data()))
     .filter(Boolean);
 
   return attachReplyUserNames(replies);
 }
 
 async function createHowCardReply({ cardId, uid, body }) {
-  const cardRef = db().collection('how-cards').doc(cardId);
-  const replyRef = cardRef.collection('replies').doc();
+  const cardRef = db().collection("how-cards").doc(cardId);
+  const replyRef = cardRef.collection("replies").doc();
   let replyData = null;
 
-  await db().runTransaction(async transaction => {
+  await db().runTransaction(async (transaction) => {
     const cardDoc = await transaction.get(cardRef);
     if (!cardDoc.exists || !isHowCardComment(cardDoc.data())) {
-      throwFirestoreError('Howカードが見つかりません', 'not-found');
+      throwFirestoreError("Howカードが見つかりません", "not-found");
     }
 
     replyData = {
@@ -133,28 +187,47 @@ async function createHowCardReply({ cardId, uid, body }) {
   });
 
   const updatedCard = await cardRef.get();
-  const replyCount = updatedCard.exists ? currentReplyCount(updatedCard.data()) : 0;
-  const reply = serializeHowCardReply(replyRef.id, cardId, { ...replyData, created_at: null });
+  const replyCount = updatedCard.exists
+    ? currentReplyCount(updatedCard.data())
+    : 0;
+  const reply = serializeHowCardReply(replyRef.id, cardId, {
+    ...replyData,
+    created_at: null,
+  });
   const [withUserName] = await attachReplyUserNames([reply]);
   return { reply: withUserName, replyCount };
 }
 
-async function updateHowCard({ uid, cardId, comment, songStart, songEnd, songId, artistId, itunesId, songSlug }) {
-  const ref = db().collection('how-cards').doc(cardId);
+async function updateHowCard({
+  uid,
+  cardId,
+  comment,
+  songStart,
+  songEnd,
+  songId,
+  artistId,
+  itunesId,
+  songSlug,
+  tags = [],
+}) {
+  const ref = db().collection("how-cards").doc(cardId);
 
-  await db().runTransaction(async transaction => {
+  await db().runTransaction(async (transaction) => {
     const snapshot = await transaction.get(ref);
     if (!snapshot.exists) {
-      throwFirestoreError('Howカードが見つかりません', 'not-found');
+      throwFirestoreError("Howカードが見つかりません", "not-found");
     }
 
     const data = snapshot.data();
     if (!isHowCardComment(data)) {
-      throwFirestoreError('Howカードが見つかりません', 'not-found');
+      throwFirestoreError("Howカードが見つかりません", "not-found");
     }
 
     if (data.user_id !== uid) {
-      throwFirestoreError('このHowカードへのアクセス権がありません', 'permission-denied');
+      throwFirestoreError(
+        "このHowカードへのアクセス権がありません",
+        "permission-denied",
+      );
     }
 
     const patch = {
@@ -164,6 +237,7 @@ async function updateHowCard({ uid, cardId, comment, songStart, songEnd, songId,
       song_id: songId,
       itunes_id: itunesId ?? songId,
       artist_id: artistId,
+      tags: Array.isArray(tags) ? tags : [],
       updated_at: FieldValue.serverTimestamp(),
     };
     if (songSlug) {
@@ -179,10 +253,10 @@ async function updateHowCard({ uid, cardId, comment, songStart, songEnd, songId,
 }
 
 async function likeHowCard({ cardId, uid }) {
-  const cardRef = db().collection('how-cards').doc(cardId);
-  const likeRef = cardRef.collection('liked-by').doc(uid);
+  const cardRef = db().collection("how-cards").doc(cardId);
+  const likeRef = cardRef.collection("liked-by").doc(uid);
 
-  return db().runTransaction(async transaction => {
+  return db().runTransaction(async (transaction) => {
     const cardDoc = await transaction.get(cardRef);
     if (!cardDoc.exists) return null;
 
@@ -207,10 +281,10 @@ async function likeHowCard({ cardId, uid }) {
 }
 
 async function upsertUserProfile({ uid, email, displayName }) {
-  const userRef = db().collection('users').doc(uid);
+  const userRef = db().collection("users").doc(uid);
   const now = FieldValue.serverTimestamp();
 
-  await db().runTransaction(async transaction => {
+  await db().runTransaction(async (transaction) => {
     const snapshot = await transaction.get(userRef);
     const existingData = snapshot.exists ? snapshot.data() : {};
     const data = {
@@ -232,7 +306,7 @@ async function upsertUserProfile({ uid, email, displayName }) {
 }
 
 async function getUserProfile(uid) {
-  const doc = await db().collection('users').doc(uid).get();
+  const doc = await db().collection("users").doc(uid).get();
   if (!doc.exists) return null;
   return serializeUser(doc.id, doc.data());
 }
@@ -244,8 +318,11 @@ function serializeHowCard(id, data) {
   const songId = canonicalSongId ?? storedSongId;
   if (!songId) return null;
 
-  const songSlug = normalizeString(data.song_slug)
-    ?? (canonicalSongId && storedSongId && storedSongId !== canonicalSongId ? storedSongId : null);
+  const songSlug =
+    normalizeString(data.song_slug) ??
+    (canonicalSongId && storedSongId && storedSongId !== canonicalSongId
+      ? storedSongId
+      : null);
 
   const howCard = {
     id,
@@ -266,13 +343,13 @@ function serializeHowCard(id, data) {
   if (canonicalSongId) {
     howCard.itunes_id = canonicalSongId;
   }
-  if (typeof data.song_slug === 'string') {
+  if (typeof data.song_slug === "string") {
     howCard.song_slug = data.song_slug;
   }
-  if (typeof data.song_title === 'string') {
+  if (typeof data.song_title === "string") {
     howCard.song_title = data.song_title;
   }
-  if (typeof data.artist_name === 'string') {
+  if (typeof data.artist_name === "string") {
     howCard.artist_name = data.artist_name;
   }
 
@@ -280,12 +357,14 @@ function serializeHowCard(id, data) {
 }
 
 async function attachUserNames(howCards) {
-  const userIds = [...new Set(howCards.map(card => card.user_id).filter(Boolean))];
+  const userIds = [
+    ...new Set(howCards.map((card) => card.user_id).filter(Boolean)),
+  ];
   if (userIds.length === 0) return howCards;
 
   const userNames = await userNamesById(userIds);
 
-  return howCards.map(card => ({
+  return howCards.map((card) => ({
     ...card,
     user_name: userNames.get(card.user_id) ?? card.user_name ?? null,
   }));
@@ -298,11 +377,13 @@ async function attachUserName(howCard) {
 }
 
 async function attachReplyUserNames(replies) {
-  const userIds = [...new Set(replies.map(reply => reply.user_id).filter(Boolean))];
+  const userIds = [
+    ...new Set(replies.map((reply) => reply.user_id).filter(Boolean)),
+  ];
   if (userIds.length === 0) return replies;
 
   const userNames = await userNamesById(userIds);
-  return replies.map(reply => ({
+  return replies.map((reply) => ({
     ...reply,
     user_name: userNames.get(reply.user_id) ?? reply.user_name ?? null,
   }));
@@ -310,7 +391,7 @@ async function attachReplyUserNames(replies) {
 
 async function userNamesById(userIds) {
   const snapshots = await Promise.all(
-    userIds.map(userId => db().collection('users').doc(userId).get())
+    userIds.map((userId) => db().collection("users").doc(userId).get()),
   );
   const userNames = new Map();
   snapshots.forEach((snapshot, index) => {
@@ -350,9 +431,9 @@ function serializeHowCardReply(id, cardId, data) {
 function isHowCardReply(data) {
   return Boolean(
     data &&
-      typeof data.body === 'string' &&
-      data.body.trim().length > 0 &&
-      typeof data.user_id === 'string'
+    typeof data.body === "string" &&
+    data.body.trim().length > 0 &&
+    typeof data.user_id === "string",
   );
 }
 
@@ -369,7 +450,7 @@ function serializeUser(id, data = {}) {
 
 function displayNameFromUserData(data = {}) {
   const displayName = data.display_name ?? data.displayName;
-  if (typeof displayName !== 'string') return null;
+  if (typeof displayName !== "string") return null;
   const trimmed = displayName.trim();
   return trimmed ? trimmed : null;
 }
@@ -377,29 +458,31 @@ function displayNameFromUserData(data = {}) {
 function isHowCardComment(data) {
   return Boolean(
     data &&
-      typeof data.comment === 'string' &&
-      normalizeString(data.song_id) &&
-      typeof data.artist_id === 'string' &&
-      typeof data.user_id === 'string'
+    typeof data.comment === "string" &&
+    normalizeString(data.song_id) &&
+    typeof data.artist_id === "string" &&
+    typeof data.user_id === "string",
   );
 }
 
 function canonicalMusicSongID(data) {
-  return normalizeMusicKitSongId(data.itunes_id)
-    ?? normalizeMusicKitSongId(data.music_kit_id)
-    ?? normalizeMusicKitSongId(data.song_id);
+  return (
+    normalizeMusicKitSongId(data.itunes_id) ??
+    normalizeMusicKitSongId(data.music_kit_id) ??
+    normalizeMusicKitSongId(data.song_id)
+  );
 }
 
 function normalizeString(value) {
-  if (typeof value !== 'string') return null;
+  if (typeof value !== "string") return null;
   const trimmed = value.trim();
   return trimmed || null;
 }
 
 function timestampToISOString(value) {
   if (!value) return null;
-  if (typeof value === 'string') return value;
-  if (typeof value.toDate === 'function') return value.toDate().toISOString();
+  if (typeof value === "string") return value;
+  if (typeof value.toDate === "function") return value.toDate().toISOString();
   if (value instanceof Date) return value.toISOString();
   return null;
 }
@@ -411,7 +494,7 @@ function timestampMillis(value) {
 }
 
 function isFirestoreTimestamp(value) {
-  return Boolean(value && typeof value.toDate === 'function');
+  return Boolean(value && typeof value.toDate === "function");
 }
 
 function compareRecommendedHowCards(left, right) {
@@ -449,6 +532,7 @@ function throwFirestoreError(message, code) {
 
 module.exports = {
   createHowCard,
+  createReactionSession,
   getHowCards,
   getHowCard,
   getRecommendedHowCards,

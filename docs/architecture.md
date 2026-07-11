@@ -6,36 +6,46 @@
 
 ### iOS アプリ（`Othello/`）
 
-| 技術 | 用途 |
-|---|---|
-| Swift / SwiftUI | UI・アプリ全般 |
-| MusicKit | Apple Music の楽曲検索・再生・再生位置取得 |
-| CMHeadphoneMotionManager | AirPods 頭部モーション取得 |
-| Core ML | `OthelloActivityClassifier` による補助推論 |
-| Firebase Auth | ログイン、ID token 取得 |
-| URLSession | Functions / Musixmatch API 連携 |
-| Musixmatch API | 時間同期歌詞または静的歌詞取得 |
-| AVFoundation | 出力音量取得、UI visualizer の補助値 |
+| 技術                     | 用途                                       |
+| ------------------------ | ------------------------------------------ |
+| Swift / SwiftUI          | UI・アプリ全般                             |
+| MusicKit                 | Apple Music の楽曲検索・再生・再生位置取得 |
+| CMHeadphoneMotionManager | AirPods 頭部モーション取得                 |
+| Core ML                  | `OthelloActivityClassifier` による補助推論 |
+| Firebase Auth            | ログイン、ID token 取得                    |
+| URLSession               | Functions / Musixmatch API 連携            |
+| Musixmatch API           | 時間同期歌詞または静的歌詞取得             |
+| AVFoundation             | 出力音量取得、UI visualizer の補助値       |
 
 HealthKit / 心拍連携は現行実装から削除済み。
 
 ### バックエンド（`functions/`）
 
-| 技術 | 用途 |
-|---|---|
-| Firebase Cloud Functions v2 | 本番 API のデプロイ |
-| Node.js 20 / Express | HTTP routing |
-| Firebase Admin SDK | Firestore read/write、Firebase ID token 検証 |
-| Firestore | `users` / `how-cards` 永続化 |
+| 技術                        | 用途                                         |
+| --------------------------- | -------------------------------------------- |
+| Firebase Cloud Functions v2 | 本番 API のデプロイ                          |
+| Node.js 20 / Express        | HTTP routing                                 |
+| Firebase Admin SDK          | Firestore read/write、Firebase ID token 検証 |
+| Firestore                   | `users` / `how-cards` 永続化                 |
 
 旧 `backend/` は deprecated な参照実装。Claude / `/sessions` 系 API は Functions 本番には接続されていない。
 
+### Web ダッシュボード（`web/`）
+
+| 技術                                | 用途                                                                     |
+| ----------------------------------- | ------------------------------------------------------------------------ |
+| Next.js（App Router）/ TypeScript   | 閲覧用 UI（静的エクスポート `output: "export"`）                         |
+| Firebase JS SDK（Auth / Firestore） | iOS と同じアカウントでログイン、Firestore を直読み                       |
+| Firebase Hosting                    | 同一プロジェクト `howtune-74252` で配信（https://howtune-74252.web.app） |
+
+**閲覧専用**の新サーフェス。収集は iOS、閲覧は Web、真実の源は Firebase という責務分離（ADR-0007）。本人向けは `how-cards` を `user_id==自分` で直読み（Phase 1）、B2B は Functions で集計・匿名化した `song_insights`（k=5・`user_id` を含めない）のみを見せる（Phase 2）。
+
 ### AI モデル（`ai-recognition/`）
 
-| 技術 | 用途 |
-|---|---|
+| 技術                | 用途                                      |
+| ------------------- | ----------------------------------------- |
 | Create ML / Core ML | 3状態（groove / chill / neutral）推論候補 |
-| TypeScript tooling | 学習・前処理パイプライン |
+| TypeScript tooling  | 学習・前処理パイプライン                  |
 
 ---
 
@@ -114,6 +124,7 @@ HealthKit / 心拍連携は現行実装から削除済み。
 team-10/
 ├── Othello/                    # iOS ネイティブアプリ
 ├── functions/                  # Firebase Functions 本番 API
+├── web/                        # 閲覧用 Web ダッシュボード（Next.js / Firebase Hosting）
 ├── backend/                    # deprecated 参照実装
 ├── ai-recognition/             # 反応分類モデル
 ├── frontend/                   # MVP 未使用
@@ -139,13 +150,13 @@ team-10/
 
 ## パフォーマンス要件
 
-| 操作 | 目標 |
-|---|---|
-| MusicKit 再生位置更新 | UI を阻害しない |
-| AirPods 頭部モーション取得 | background queue で処理 |
-| 反応スコア更新 | 体感的にリアルタイム |
-| Howカード一覧取得 | 2 秒以内 |
-| 歌詞取得 | 失敗時は静的歌詞または歌詞なし表示へ fallback |
+| 操作                       | 目標                                          |
+| -------------------------- | --------------------------------------------- |
+| MusicKit 再生位置更新      | UI を阻害しない                               |
+| AirPods 頭部モーション取得 | background queue で処理                       |
+| 反応スコア更新             | 体感的にリアルタイム                          |
+| Howカード一覧取得          | 2 秒以内                                      |
+| 歌詞取得                   | 失敗時は静的歌詞または歌詞なし表示へ fallback |
 
 ---
 

@@ -8,9 +8,9 @@ enum HowTuneDesign {
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
-    static let background = Color.black
-    static let surface = Color.white.opacity(0.06)
-    static let divider = Color.gray.opacity(0.3)
+    static let background = Color(.systemBackground)
+    static let surface = Color(.secondarySystemBackground)
+    static let divider = Color(.separator)
 }
 
 // MARK: - プログレスインジケーター
@@ -18,7 +18,7 @@ func progressIndicator(current: Int, total: Int) -> some View {
     HStack(spacing: 8) {
         ForEach(1...total, id: \.self) { i in
             Capsule()
-                .fill(i <= current ? HowTuneDesign.accent : Color.gray.opacity(0.3))
+                .fill(i <= current ? HowTuneDesign.accent : Color(.systemGray4))
                 .frame(height: 3)
         }
     }
@@ -35,10 +35,10 @@ func purposeCard(icon: String, title: String, body: String) -> some View {
             Text(title)
                 .font(.subheadline)
                 .fontWeight(.semibold)
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(.label))
             Text(body)
                 .font(.caption)
-                .foregroundStyle(.gray)
+                .foregroundStyle(Color(.secondaryLabel))
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
@@ -58,7 +58,7 @@ func skipButton(label: String, action: @escaping () -> Void) -> some View {
     Button(action: action) {
         Text(label)
             .font(.subheadline)
-            .foregroundStyle(.gray)
+            .foregroundStyle(Color(.secondaryLabel))
     }
 }
 

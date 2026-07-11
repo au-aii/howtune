@@ -16,7 +16,7 @@ struct ReactionTimelineView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color(.systemBackground).ignoresSafeArea()
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
@@ -64,11 +64,11 @@ struct ReactionTimelineView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(viewModel.trackTitle)
                     .font(.headline)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.label))
                     .lineLimit(1)
                 Text(viewModel.trackArtist)
                     .font(.subheadline)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
             }
 
             Spacer()
@@ -79,7 +79,7 @@ struct ReactionTimelineView: View {
                     .foregroundStyle(Color(red: 1.0, green: 0.3, blue: 0.3))
                 Text(formatTime(viewModel.duration))
                     .font(.caption.monospacedDigit())
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
             }
         }
         .padding(.horizontal, 20)
@@ -92,7 +92,7 @@ struct ReactionTimelineView: View {
             HStack {
                 Text("反応タイムライン")
                     .font(.caption.bold())
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color(.secondaryLabel))
                     .kerning(0.5)
                 Spacer()
                 // 凡例
@@ -114,7 +114,7 @@ struct ReactionTimelineView: View {
             )
         }
         .padding(.vertical, 16)
-        .background(Color.white.opacity(0.03))
+        .background(Color(.secondarySystemBackground))
     }
 
     // MARK: - 反応イベントリスト
@@ -123,7 +123,7 @@ struct ReactionTimelineView: View {
             HStack {
                 Text("反応地点")
                     .font(.headline)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.label))
                 Spacer()
                 HStack(spacing: 4) {
                     Image(systemName: "sparkles")
@@ -138,7 +138,7 @@ struct ReactionTimelineView: View {
             .padding(.top, 20)
             .padding(.bottom, 12)
 
-            Divider().overlay(Color.white.opacity(0.1))
+            Divider().overlay(Color(.separator))
 
             if viewModel.events.isEmpty {
                 // 反応なしフォールバック
@@ -148,7 +148,7 @@ struct ReactionTimelineView: View {
                         .foregroundStyle(.gray.opacity(0.4))
                     Text("反応区間が検出されませんでした")
                         .font(.subheadline)
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(Color(.secondaryLabel))
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 60)

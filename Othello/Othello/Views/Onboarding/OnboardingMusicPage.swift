@@ -28,10 +28,10 @@ struct OnboardingMusicPage: View {
                     VStack(spacing: 10) {
                         Text("Apple Music の使用")
                             .font(.title2.bold())
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color(.label))
                         Text("曲の再生と再生位置の同期に使用します。Apple Music の契約がない場合、曲の再生は利用できません。")
                             .font(.body)
-                            .foregroundStyle(.gray)
+                            .foregroundStyle(Color(.secondaryLabel))
                             .multilineTextAlignment(.center)
                     }
                     .padding(.horizontal, 32)
