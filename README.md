@@ -8,7 +8,8 @@
 
 <!-- README先頭の見栄え兼SNS素材。Day2 終了までに最低1枚は貼る -->
 
-<img width="750" height="424" alt="image" src="https://github.com/user-attachments/assets/c47cee68-2fb9-47ce-8dd6-3e7ad4c3db8d" />
+<img width="750" height="424" alt="howtune-screenshot" src="https://github.com/user-attachments/assets/4be1ec79-daae-4bc7-b361-9fa0b4554062" />
+
 
 ## プロダクト概要
 

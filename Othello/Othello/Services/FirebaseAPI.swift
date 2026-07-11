@@ -200,6 +200,7 @@ final class FirebaseAPI {
     ) async throws -> URLRequest {
         let token = try await firebaseIDToken()
         let url = try makeURL(path: path, queryItems: queryItems)
+        print("🔗 API request: \(method) \(url.absoluteString)")
         var request = URLRequest(url: url, timeoutInterval: 15)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")
