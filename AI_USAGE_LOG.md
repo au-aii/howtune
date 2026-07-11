@@ -1957,6 +1957,26 @@
 - **評価**：採用
 - **採用 / 不採用の理由**：デプロイ成功だけで終わらせず「実際に発火して再集計するか」を追加/削除の両方で検証し、ライブ集計の動作を証拠付きで確認できたため。
 
+### #022 PR #8 コンフリクト解決 → 並列検証 → squash マージ
+
+- **時刻**：23:14
+- **ツール**：Claude Code (Sonnet / Opus・`/grill-me` 審問)
+- **目的**：PR #8（Web ダッシュボード Phase 1+2）の main コンフリクト解消と、検証を挟んだ安全なマージ
+- **プロンプト**：
+  ```text
+  solve conflicts about pr #8
+  ```
+  （その後 `/grill-me` で検証範囲・マージ方式を審問）
+- **出力サマリ**：
+  - 別 worktree で `origin/main` を feat ブランチにマージし、4ファイルのコンフリクトを解決（`Othello.xcscheme` / `ContentView.swift` / `LoginView.swift` / `SignUpView.swift`）。ライト/ダーク対応の `Color(.label)` 統一を採りつつ、main 側の `.textContentType(.newPassword)` を取りこぼさず保持
+  - `/grill-me` で「検証してからマージ / 検証範囲=統合確認+公開安全性 / squash merge」を合意
+  - 3系統を並列検証：**web build**（`.env.local` ありで静的エクスポート green、env 無しは prerender 落ちと切り分け）／**公開安全性スキャン**（秘密鍵・トークン・実パス無し、k=5 匿名化が要件一致、なりすまし不可を確認）／**iOS 統合差分レビュー**（3方向 diff でコンフリクト解決の正しさ確認、マーカー残存 0）
+  - 中程度指摘（UITextField 白のライトモード視認性）は `git show origin/main` で **main 既存**の負債と切り分け、マージのブロッカーから除外
+  - クリティカル無しを確認し squash マージ（`6ec606a`）、リモートブランチ削除
+  - follow-up を Issue #10（song_insights 認可漏れ）/ #11（.env.local.example 実値）/ #12（iOS ライトモード視認性）に一本化
+- **評価**：採用
+- **採用 / 不採用の理由**：`MERGEABLE` だけを根拠に即マージせず、build・公開安全性・統合差分を並列検証してブロッカー有無を証拠付きで確認。指摘は 3方向 diff・`git show` で「今回のマージが引き金か main 既存か」を切り分け、乱立を避けつつ重要 follow-up のみ Issue 化できたため。
+
 ---
 
 ## 全体振り返り
