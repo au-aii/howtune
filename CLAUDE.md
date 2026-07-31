@@ -2,6 +2,15 @@
 
 グローバルルール（`~/.claude/CLAUDE.md`）を継承しつつ、このリポ固有の規約を追加する。
 
+## skills / agents / commands の供給元
+
+このリポには置かない。`~/.claude/`（[claude-dotfiles](https://github.com/au-aii/claude-dotfiles) の `install.sh` が張る symlink）から供給される。以前は `.claude/` に物理コピーを置いていたが、正本と同期されず古い版で固定されていたため削除した。
+
+- 自分のマシン: claude-dotfiles を clone して `bash install.sh`
+- それ以外: `/plugin marketplace add au-aii/claude-config` → `/plugin install dev@claude-config-marketplace`
+
+`.claude/settings.json`（このリポ固有の権限・モデル設定）だけは残してある。
+
 ## このプロジェクトについて
 
 Engineer Guild Hackathon 2026/05 の Team 10 リポジトリ。
