@@ -12,7 +12,6 @@ exports.api = onRequest(
     cors: true,
     memory: "256MiB",
     timeoutSeconds: 60,
-    minInstances: 1,
   },
   require("./app"),
 );
