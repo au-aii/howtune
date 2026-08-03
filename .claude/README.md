@@ -12,5 +12,6 @@
 /plugin install common@claude-config-marketplace
 ```
 
-- `settings.json` の `Skill(...)` 許可リストは、plugin 導入後もスキル名が同じためそのまま有効
+- ⚠️ `settings.json` の `Skill(...)` 許可リストは **plugin 導入後は名前が変わるため効かなくなる**。plugin 由来のコンポーネントは `<plugin>:<name>` で名前空間化されるので、`Skill(prd-writing)` は `Skill(dev:prd-writing)` に書き換えが要る（2026-08-01 実測・au-aii/claude-dotfiles の ADR-0024）
+- コマンド・エージェントも同様に `/dev:ship`・`common:code-reviewer` になる
 - 以後の更新は `/plugin update` で取得する（コピーの手同期は不要）
