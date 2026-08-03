@@ -1979,6 +1979,28 @@
 
 ---
 
+## Day 4（2026-08-03）
+
+### #023 Firebase ランニングコスト調査 → minInstances:1 削除
+
+- **時刻**：14:20
+- **ツール**：Claude Code (Sonnet)
+- **目的**：ハッカソン後も発生し続けている Firebase (egh-howtune) のランニングコストの原因特定と削減
+- **プロンプト**：
+  ```text
+  howtune のfirebase がランコスかかってるから削りたいんだけど最近いじれてないから　どうすれば良いでしょうか
+  ```
+- **出力サマリ**：
+  - `firebase.json` / `functions/index.js` を確認し、`exports.api`（v2 onRequest, Cloud Run 基盤）に `minInstances: 1` を発見
+  - `gcloud run services describe api --region=asia-northeast1` で実デプロイ済み設定を確認、`minScale: 1` が本番に反映済みと確定（推測で終わらせず実測で裏取り）
+  - 常時1インスタンス（memory 256Mi, cpu 1）起動＝リクエスト無しでも課金され続ける構造と特定。他（Firestore トリガー・Storage・Hosting）はイベント駆動/静的でコスト主因の可能性は低いと判断
+  - Issue #17 を起票 → 紐づきブランチ作成 → `minInstances: 1` を削除（デフォルトの 0 に戻す）1行差分でコミット
+  - デプロイ（`firebase deploy --only functions`）は課金・本番挙動に影響するためユーザー自身の実行に委ね、ここでは停止
+- **評価**：採用
+- **採用 / 不採用の理由**：コードの推測だけで終わらせず `gcloud run services describe` で本番の実設定を実測確認してから対応した。正確な請求内訳（金額）はコンソールでしか見えないため断定を避け、コード変更は最小の1行差分に留めた。
+
+---
+
 ## 全体振り返り
 
 - **AI が一番効いた場面**：
